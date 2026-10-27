@@ -38,3 +38,7 @@ Serve the repository with any static HTTP server. Run `node tests/tracing.test.c
 ## iPad
 
 Open the live link in Safari, tap **Let’s play**, then use a finger on the tracing board. Safari’s Share menu → **Add to Home Screen** can provide a home-screen shortcut. An internet connection is required to load the site. There is no service worker/offline cache guarantee.
+
+## Playful letter worlds update
+
+Letter prompts say the letter once (for example, “C is for cat”). All letters have themed backgrounds with tappable scene objects. Completed letters trigger full-screen confetti and dancing stickers, respecting animation settings and reduced motion. Animal calls are synthesized cartoon imitations; quieter animals use movement/habitat effects instead of invented calls. A three-letter L–T–I adventure provides short practice with star progress. Speech and effects are canceled when switching letters or muting.
