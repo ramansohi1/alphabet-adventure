@@ -42,3 +42,9 @@ Open the live link in Safari, tap **Let’s play**, then use a finger on the tra
 ## Playful letter worlds update
 
 Letter prompts say the letter once (for example, “C is for cat”). All letters have themed backgrounds with tappable scene objects. Completed letters trigger full-screen confetti and dancing stickers, respecting animation settings and reduced motion. Animal calls are synthesized cartoon imitations; quieter animals use movement/habitat effects instead of invented calls. A three-letter L–T–I adventure provides short practice with star progress. Speech and effects are canceled when switching letters or muting.
+
+## Handwriting and learning update
+
+Four labeled guides: sky (80), plane (180), grass (360), worm (425). Settings support left/right-handed layouts without reversing letters, English voice selection, a test phrase, and American zee/British zed. Letter names use explicit spoken spellings to reduce browser misreadings. Speech still depends on device/browser voices; Dessa is not integrated.
+
+Wide-trail and dots practice modes, current-stroke Help me, support after repeated incorrect starts, less-practiced letter suggestions, local practice counts, optional breaks after three completions, and paused background animations while tracing. Practice records use a separate localStorage key and do not indicate mastery.
