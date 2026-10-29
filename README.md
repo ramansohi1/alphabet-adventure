@@ -102,3 +102,20 @@ captions; speech errors have a timeout recovery. Changing letters, opening
 settings, or interrupting Watch cancels its speech, animation and pending work.
 Tests cover all 52 scripts and their stroke counts, narration sequencing,
 cancellation, muted playback and speech failure recovery.
+
+### Simpler tools and a fresh-page retry loop
+ABC/abc now live in the header. Handedness controls are removed. Children have
+two explicit tools: Trace (broad guide) and Pencil (their own fine line). Dots
+is retained only for viewing older observations, not offered for new practice.
+Parent tolerance labels now say More wiggle room and Closer tracing.
+
+Completed work remains visible for 2.5 seconds before a rainbow celebration
+with a bouncing picture, confetti and three tappable musical stars. The picture
+still advances; rewards never advance automatically.
+
+Pencil retries count drawn gestures with less than 18 guide units of forward
+progress, not ordinary tiny taps or canceled touches. Four such consecutive
+tries, twelve overall, or drawing longer than eight times the letter path
+(minimum 1200 guide units) prompts a fresh page after 1.3 seconds. Completing
+a stroke clears the consecutive count. The whole letter resets with its start
+highlighted; earned stickers are preserved. Reset attempts are recorded locally.
