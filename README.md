@@ -90,3 +90,15 @@ Sandy (en-US) is the only speech voice used. Voice and accent pickers were
 removed. If Sandy is not installed/exposed by the browser, speech is silent
 rather than substituting another voice; a clear parent notice explains this.
 The browser's voiceschanged event updates availability after voices load.
+
+### Narrated Watch lessons
+Each uppercase and lowercase letter has hand-written instructions aligned with
+its ordered SVG strokes. Sandy names the sky, plane, grass and worm lines as
+appropriate, using “near” when a curve does not touch a line. Watch introduces
+the letter, then animates and narrates each stroke. It advances only after both
+finish, with a brief pause before the next stroke. Captions mirror the spoken
+instructions. Muted or Sandy-unavailable devices still get the animation and
+captions; speech errors have a timeout recovery. Changing letters, opening
+settings, or interrupting Watch cancels its speech, animation and pending work.
+Tests cover all 52 scripts and their stroke counts, narration sequencing,
+cancellation, muted playback and speech failure recovery.
