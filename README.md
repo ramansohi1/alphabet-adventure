@@ -69,3 +69,24 @@ one shuffled selection when eligible letters need support. Review uses the last
 five attempts in the current guide mode and difficulty, excludes the current
 letter, and never uses speed as a target. Parents can disable this in settings.
 These observations guide practice, not assess independent handwriting skill.
+
+### Swipe shelf, open paper, and parent charts
+All 26 letters are in one native horizontal scrolling shelf. Touch swipes,
+mouse dragging and keyboard focus work without page arrows. The paper viewBox
+adapts to the available area without distorting letters; ruled lines span it.
+Pencil marks can start anywhere. Free exploration does not begin a tracing
+observation until the child reaches the current guided stroke. Once tracing
+begins, observations still include deviations. Letter rewards continue to
+require ordered stroke completion. Line names are clickable and keyboard
+accessible, and the directional arrow is larger and high contrast.
+
+Watch demonstrates the whole letter; Hint highlights the current stroke and
+gives a short cue without running a demonstration or changing practice mode.
+Parent charts filter observations by mode and support level, show weighted
+near-guide movement, recent attempts, error categories and active time. Empty
+charts show an honest first-practice state. Details remain available on demand.
+
+Sandy (en-US) is the only speech voice used. Voice and accent pickers were
+removed. If Sandy is not installed/exposed by the browser, speech is silent
+rather than substituting another voice; a clear parent notice explains this.
+The browser's voiceschanged event updates availability after voices load.
