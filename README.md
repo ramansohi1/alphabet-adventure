@@ -48,3 +48,24 @@ Letter prompts say the letter once (for example, “C is for cat”). All letter
 Four labeled guides: sky (80), plane (180), grass (360), worm (425). Settings support left/right-handed layouts without reversing letters, English voice selection, a test phrase, and American zee/British zed. Letter names use explicit spoken spellings to reduce browser misreadings. Speech still depends on device/browser voices; Dessa is not integrated.
 
 Wide-trail and dots practice modes, current-stroke Help me, support after repeated incorrect starts, less-practiced letter suggestions, local practice counts, optional breaks after three completions, and paused background animations while tracing. Practice records use a separate localStorage key and do not indicate mastery.
+
+### Guided practice and local observations
+Letter speech now uses a slower 0.70 speech rate. Pencil mode labels the sky,
+plane, grass and worm lines and offers tap-to-hear guidance for each stroke.
+Every second completion earns named praise; repeated difficulties can trigger
+encouragement, at most once every 25 seconds.
+
+The parent settings show up to 150 recent attempts, grouped by letter case,
+guide mode and difficulty. Near-guide percentage uses raw movement samples
+spaced at least 4 SVG units apart, within 12 SVG units of the current stroke.
+Active time counts pointer movement intervals capped at 120 ms, excluding idle
+pauses; speed is guide-coordinate travel per active second, not paper-writing
+speed. Missed starts, off-trail episodes, jumps, help requests and per-stroke
+errors are recorded, including abandoned attempts. Raw coordinates are not
+persisted. Observations remain in localStorage and Reset clears them.
+
+Dice practice defaults to using recent observations: two review selections for
+one shuffled selection when eligible letters need support. Review uses the last
+five attempts in the current guide mode and difficulty, excludes the current
+letter, and never uses speed as a target. Parents can disable this in settings.
+These observations guide practice, not assess independent handwriting skill.
