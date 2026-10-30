@@ -130,3 +130,13 @@ prompts during the visit; interrupted or permission-blocked voices are not
 blacklisted. Watch uses the same fallback and retains captions/error recovery.
 Parent settings show the chosen voice and offer Hear voice. No manual selection
 is needed. Actual speech availability still depends on the browser/device.
+
+### Movement-based tracing
+Pointer-down and stationary events never advance a letter. Checkpoints now
+follow the closest forward point supported by actual continuous travel, with
+ordered progress, jump rejection, endpoint proximity and minimum traveled
+length checks. Trace accepts contact anywhere on the active stroke and shows
+a touch indicator; starting ahead does not skip unfinished writing. A child
+can slide back to the unfinished part and continue. Tap-only contact is not
+sampled as tracing movement. Tests repeat taps across all 52 forms in Trace
+and Pencil and verify offset tracing, recovery and short dot strokes.
