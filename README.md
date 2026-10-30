@@ -119,3 +119,14 @@ tries, twelve overall, or drawing longer than eight times the letter path
 (minimum 1200 guide units) prompts a fresh page after 1.3 seconds. Completing
 a stroke clears the consecutive count. The whole letter resets with its start
 highlighted; earned stickers are preserved. Reset attempts are recorded locally.
+
+### Automatic English speech
+Sandy is preferred, no longer required. The app selects Sandy US, then a local
+US English voice, another US English voice, and other English voices. If the
+voice list is initially empty, it requests the browser default with en-US rather
+than suppressing speech. Voice lists are checked on every prompt and refreshed
+on voiceschanged. Voices reporting synthesis failures are skipped for later
+prompts during the visit; interrupted or permission-blocked voices are not
+blacklisted. Watch uses the same fallback and retains captions/error recovery.
+Parent settings show the chosen voice and offer Hear voice. No manual selection
+is needed. Actual speech availability still depends on the browser/device.
