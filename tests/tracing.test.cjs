@@ -49,7 +49,7 @@ assert.ok(!fs.readFileSync(path.join(root,'scene.js'),'utf8').includes('function
 
 run("saved.adaptive=false;observations=[];attempt=null;current='L';letterCase='upper';setGuide('pencil');render();");for(const points of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(points);assert.equal(run('observations.length'),1);assert.equal(run('observations[0].completed'),true);assert.equal(run('observations[0].onLine'),run('observations[0].samples'));assert.equal(run('observations[0].mode'),'pencil');assert.match(get('line-coach').textContent,/sky/);assert.match(get('line-coach').textContent,/grass/);
 run("render();observeError('starts');observeError('starts');observeError('starts');endAttempt();");assert.equal(run('observations.at(-1).completed'),false);assert.equal(run('observations.at(-1).starts'),3);assert.equal(run('observations.at(-1).strokes[0].errors'),3);
-run("current='A';");assert.equal(run('reviewLetter()'),'L');run('sessionLetters=2;praiseMilestone();');assert.equal(spoken.at(-1).text,'Good job, Hargun!');assert.equal(spoken.at(-1).rate,.7);
+run("current='A';");assert.equal(run('reviewLetter()'),'L');run('sessionLetters=2;praiseMilestone();');assert.equal(spoken.at(-1).text,'Good job, Hargun!');assert.equal(spoken.at(-1).rate,.8);
 run('showProgress();');assert.ok(get('observation-rows').children.length);run("observations=Array.from({length:150},()=>observations[0]);current='L';render();observeError('starts');endAttempt();");assert.equal(run('observations.length'),150);console.log('PASS: local accuracy observations, incomplete attempts, stroke errors, adaptive review, named praise and bounded storage.');
 
 run("attempt=null;current='L';render();var fakeNow=100000;Date.now=()=>fakeNow;lastEncouragement=0;observeError('starts');observeError('starts');observeError('starts');");assert.equal(spoken.at(-1).text,'You got this, Hargun. Take your time.');const speechCount=spoken.length;run("observeError('starts');");assert.equal(spoken.length,speechCount);run('observeTouch(samples[0][0]);fakeNow+=60;observeTouch(samples[0][2]);pauseObservation();fakeNow+=60000;observeTouch(samples[0][3]);');assert.equal(run('attempt.activeMs'),60);console.log('PASS: encouragement cooldown and idle time excluded from active tracing time.');
@@ -66,7 +66,7 @@ run("current='A';letterCase='upper';render();showDemo();");const stale=spoken.at
 run('showDemo();');spoken.at(-1).onerror();assert.equal(spoken.at(-1).text,run('WATCH_SCRIPTS.B.upper[0]'),'Speech error does not trap introduction');run('stopDemo();');
 run('saved.sound=false;showDemo();');assert.equal(get('watch-caption').textContent,run('WATCH_SCRIPTS.B.upper[0]'));assert.equal(typeof anim,'function');run('stopDemo();');console.log('PASS: all 52 narrated Watch lessons, per-stroke sequencing, cancellation, speech errors and muted captions.');
 run("saved.sound=false;current='L';letterCase='upper';setGuide('pencil');render();");for(let i=0;i<4;i++){event('pointerdown',{x:30,y:200});event('pointermove',{x:60,y:210});event('pointerup',{x:60,y:210});}assert.equal(run('retryPending'),true,'Four unsuccessful tries trigger fresh page');assert.equal(run('observations.at(-1).restarts'),1);const retryJob=[...scheduled.entries()].find(([,v])=>v.ms===1300);assert.ok(retryJob);scheduled.delete(retryJob[0]);retryJob[1].fn();assert.equal(run('retryPending'),false);assert.equal(run('progress'),0);assert.equal(run('current'),'L');assert.equal(run('pencilTotalMisses'),0);
-run('render();');event('pointerdown',{x:30,y:200});event('pointermove',{x:60,y:210});get('board').listeners.pointercancel({pointerId:1,type:'pointercancel'});assert.equal(run('pencilMisses'),0,'Canceled touch is not a failed try');run('render();');for(const points of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(points);assert.equal(run('finished'),true);assert.equal(run('retryPending'),false);assert.ok([...scheduled.values()].some(v=>v.ms===2500),'Finished work remains visible for 2.5 seconds');
+run('render();');event('pointerdown',{x:30,y:200});event('pointermove',{x:60,y:210});get('board').listeners.pointercancel({pointerId:1,type:'pointercancel'});assert.equal(run('pencilMisses'),0,'Canceled touch is not a failed try');run('render();');for(const points of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(points);assert.equal(run('finished'),true);assert.equal(run('retryPending'),false);assert.ok([...scheduled.values()].some(v=>v.ms===900),'Finished work remains visible for 0.9 seconds');
 run('render();');event('pointerdown',{x:30,y:200});for(let i=0;i<100&&!run('retryPending');i++)event('pointermove',{x:i%2?30:600,y:200});assert.equal(run('retryPending'),true,'Continuous scribbling is bounded');run('render();');assert.equal(run('retryPending'),false);console.log('PASS: bounded pencil retries, fresh-letter reset, cancellation exemption, scribble limit and delayed reward.');
 
 run('saved.sound=true;unavailableVoices.clear();');context.window.speechSynthesis.getVoices=()=>[];run('describe();');assert.equal(spoken.at(-1).voice,undefined);assert.equal(spoken.at(-1).lang,'en-US');assert.ok(spoken.at(-1).text.includes('is for'),'An initially empty voice list still requests speech');
@@ -112,8 +112,8 @@ assert.equal(run('matchPencilShape(testInk,samples).pass'),false,'A scribbled re
 context.testInk=run('samples.map(s=>s.map(p=>({...p})))').flatMap(s=>[s,s,s]);
 assert.equal(run('matchPencilShape(testInk,samples).pass'),false,'Repeated overdraw is not a clean shape');
 run("saved.sound=true;describe();");
-assert.equal(spoken.at(-1).pitch,1.35,'Playful pitch retains automatic voice fallback');
-assert.equal(spoken.at(-1).rate,.7,'Letter speech stays slow');
+assert.equal(spoken.at(-1).pitch,1.05,'Gentle pitch retains automatic voice fallback');
+assert.equal(spoken.at(-1).rate,.8,'Letter speech stays measured');
 console.log('PASS: whole-shape Pencil matching for all 52 forms, two support levels, three sizes, translated/reversed strokes; missing parts, missing dots and scribbles rejected.');
 for(const [wanted,drawn,kind] of [['C','O','upper'],['O','C','upper'],['E','F','upper'],['F','E','upper'],['R','P','upper'],['P','R','upper'],['B','D','lower'],['D','B','lower']]){
  run(`current='${drawn}';letterCase='${kind}';render();`);context.otherLetter=run('samples.map(s=>s.map(p=>({...p})))');
@@ -125,3 +125,22 @@ context.otherLetter=run('samples.map(s=>s.map(p=>({x:600-p.x,y:p.y})))');
 assert.equal(run('matchPencilShape(otherLetter,samples).pass'),false,'Mirrored letters do not pass');
 assert.equal(run("dashboardStats([{mode:'pencil',shapeMatch:80,samples:5,onLine:0,activeMs:10,helps:0,completed:false}]).accuracy"),80,'Pencil charts use shape, not guide placement');
 console.log('PASS: confusable wrong-letter pairs, mirrored letters and shape-based parent metrics.');
+
+// Pause checks cover a finger held still, released incomplete work, and teardown.
+function firePencilPause(){const id=run('pencilPauseTimer');const job=scheduled.get(id);assert.ok(job,'A real drawing schedules an idle check');assert.equal(job.ms,3000);scheduled.delete(id);job.fn();}
+run("current='L';letterCase='lower';setGuide('pencil');saved.sound=false;render();");
+let idlePoints=run('samples[0]');event('pointerdown',idlePoints[0]);for(const p of idlePoints.slice(1))event('pointermove',p);
+assert.equal(run('finished'),false,'Pencil waits for release or pause');
+firePencilPause();assert.equal(run('finished'),true,'Three seconds of stillness recognizes completed live ink');
+event('pointerup',idlePoints.at(-1));assert.equal(run('pencilPauseTimer'),null,'No duplicate check after completion');
+run("current='E';letterCase='upper';render();");
+traceStroke(run('samples[0]'));const beforeInk=run('pencilStrokes.length');firePencilPause();
+assert.equal(run('finished'),false);assert.equal(get('coach-bubble').hidden,false);assert.ok(get('pencil-cue').children.length);assert.equal(run('pencilStrokes.length'),beforeInk,'Help preserves ink');
+run('schedulePencilPause()');assert.equal(run('pencilPauseTimer'),null,'Unchanged ink does not repeatedly trigger prompts');
+run('render()');event('pointerdown',{x:250,y:250});event('pointerup',{x:250,y:250});assert.equal(run('pencilPauseTimer'),null,'Taps do not start idle assessment');
+traceStroke(run('samples[0]'));run('showDemo()');assert.equal(run('pencilPauseTimer'),null,'Watch cancels idle assessment');run('stopDemo();render()');
+traceStroke(run('samples[0]'));run('pauseForDialog()');assert.equal(run('pencilPauseTimer'),null,'Opening parent settings cancels idle assessment');
+run('render()');traceStroke(run('samples[0]'));run('current="A";render()');assert.equal(run('pencilPauseTimer'),null,'Changing letters cancels stale checks');
+let prevented=0;for(const kind of ['contextmenu','selectstart','dragstart'])get('board').listeners[kind]({preventDefault(){prevented++;}});
+get('board').listeners.touchstart({touches:[{},{}],preventDefault(){prevented++;}});assert.equal(prevented,4,'Writing surface suppresses selection and two-finger browser gestures');
+console.log('PASS: three-second idle assessment, live-finger completion, helpful partial feedback, no repeat chatter, timer teardown and native selection prevention.');

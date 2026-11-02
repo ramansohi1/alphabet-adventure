@@ -164,3 +164,20 @@ Tests: `node tests/tracing.test.cjs` covers all 52 forms, two support levels,
 translated/scaled/reversed stroke input, missing parts, taps, scribbles and
 confusable letter pairs. Browser QA also completed a smaller, off-guide L with
 reversed stroke order and verified its shape score in the parent dashboard.
+
+## Preschool interaction update (v17)
+- A three-second pause after real Pencil movement checks the current ink,
+  including a finger resting on the paper. Incomplete work receives one gentle
+  visual cue and occasional brief speech; no repeat assessment without new ink.
+  Hint alignment follows the child's drawing without changing pass criteria.
+- Completed work opens the reward after 900ms. The child still chooses when
+  to continue. Letter changes, dialogs, Watch and cancellations clear idle timers.
+- Large Watch / Help / New page picture buttons, a bear feedback bubble, fewer
+  visible instructions, and a tappable letter picture replace the speaker button.
+- Child surfaces disable selection, iOS callouts and native drawing-area
+  gestures; parent settings remain selectable and scrollable.
+- Gentle Pencil matching permits more wobble, with a separate isolated-dot
+  check so a stretched stem cannot replace the dot in i/j.
+- Voice prefers available US Jenny/Aria/Samantha, then Sandy/English fallback,
+  at rate .80 and pitch 1.05. This removes the artificial high-pitch effect;
+  it is device speech, not a CoComelon recording or a custom generated narrator.
