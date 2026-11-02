@@ -140,3 +140,27 @@ a touch indicator; starting ahead does not skip unfinished writing. A child
 can slide back to the unfinished part and continue. Tap-only contact is not
 sampled as tracing movement. Tests repeat taps across all 52 forms in Trace
 and Pencil and verify offset tracing, recovery and short dot strokes.
+
+## Freehand Pencil (v16)
+Pencil captures the child's actual strokes in memory and checks the whole drawing
+on finger lift. The local geometric matcher normalizes translation and uniform
+scale, resamples actual ink, and checks bidirectional outline coverage, every
+component (including dots), and ink length. Starting points, direction and stroke
+order do not gate completion. No rotation/mirroring normalization is used.
+Trace retains ordered stroke teaching; Watch still demonstrates formation.
+
+Shape similarity is a practice signal, not OCR or a validated handwriting
+assessment. It recognizes approximations to the supplied print forms, not all
+handwriting styles. False accepts/rejections remain possible. Very tiny marks,
+missing components and excessive scribbles are rejected. Four non-improving
+gestures or twelve unsuccessful gestures offer a fresh page. Raw drawings are
+cleared on letter reset; only summary metrics are saved locally. Parent Pencil
+charts and adaptive practice use version-3 shape summaries, excluding older
+checkpoint-based Pencil records.
+
+Speech keeps automatic English fallback and slow rate (0.70), with a playful
+pitch (1.35). Actual voice character and pitch support depend on the device.
+Tests: `node tests/tracing.test.cjs` covers all 52 forms, two support levels,
+translated/scaled/reversed stroke input, missing parts, taps, scribbles and
+confusable letter pairs. Browser QA also completed a smaller, off-guide L with
+reversed stroke order and verified its shape score in the parent dashboard.

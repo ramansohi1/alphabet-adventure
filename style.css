@@ -51,3 +51,9 @@ button:active,.alphabet button:active{transform:none}.marker-pulse{animation:non
 @media(max-width:650px){.topbar{gap:5px}.brand{font-size:12px;gap:4px}.brand-icon{width:26px;height:30px}.brand-second{font-size:10px}.topbar>.case-switch{flex-basis:100px!important;margin:0 auto;min-height:42px}.topbar>.case-switch button{font-size:20px;min-width:42px}.topbar nav{gap:0}.topbar .collection-button{font-size:17px;padding:4px}.topbar .icon-button{min-width:30px;padding:4px}.practice-tools button{padding:3px 7px;min-width:42px}.practice-tools button span{display:none}.play-tools{margin-left:4px}.play-tools button{min-width:42px}.instruction-row{display:none}.reward-sky{letter-spacing:10px;font-size:30px}.reward-letter{left:5%;font-size:65px;top:37%}.reward-pop-stars{right:4%;gap:4px;top:28%}.pop-star{font-size:26px;min-height:44px;min-width:44px}.celebrate .celebration-badge{box-shadow:0 5px 0 #e1c5ed,0 0 0 10px #ffffff70}.retry-notice{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.pop-star,.celebrate .celebration-badge{animation:none}}
 @media(max-width:360px){.brand>span:last-child{display:none}.topbar>.case-switch{margin-left:4px}}
+
+/* Pencil guidance is optional; no moving checkpoints or numbered stroke gates. */
+.pencil-guide #start-marker,.pencil-guide #direction{visibility:hidden}
+.pencil-guide.hint-active #start-marker,.pencil-guide.hint-active #direction{visibility:visible}
+.pencil-guide #steps span{color:#9a6cce;background:transparent;font-size:19px}
+.pencil-guide #steps span.complete{color:#b9770c;background:#fff0bd}

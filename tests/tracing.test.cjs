@@ -3,9 +3,9 @@
 const fs=require('node:fs');const vm=require('node:vm');const assert=require('node:assert/strict');const path=require('node:path');
 function geometry(d){const t=d.match(/[MLC]|-?\d+(?:\.\d+)?/g)||[];let i=0,p={x:0,y:0},points=[];const next=()=>({x:+t[i++],y:+t[i++]});while(i<t.length){const op=t[i++];if(op==='M'){p=next();points.push(p);}else if(op==='L'){p=next();points.push(p);}else if(op==='C'){const from=p,a=next(),b=next(),end=next();for(let n=1;n<=150;n++){const u=n/150,v=1-u;points.push({x:v*v*v*from.x+3*v*v*u*a.x+3*v*u*u*b.x+u*u*u*end.x,y:v*v*v*from.y+3*v*v*u*a.y+3*v*u*u*b.y+u*u*u*end.y});}p=end;}else throw Error('Unexpected SVG '+op);}let sum=0;const segments=[];for(let n=1;n<points.length;n++){const a=points[n-1],b=points[n],length=Math.hypot(a.x-b.x,a.y-b.y);segments.push({a,b,start:sum,length});sum+=length;}return {length:sum,at(value){value=Math.max(0,Math.min(sum,value));const s=segments.find(s=>value<=s.start+s.length)||segments.at(-1);if(!s)return points[0];const u=s.length?(value-s.start)/s.length:0;return{x:s.a.x+(s.b.x-s.a.x)*u,y:s.a.y+(s.b.y-s.a.y)*u};}};}
 class Element{constructor(tag='div'){this.tag=tag;this.attrs={};this.style={setProperty(){}};this.children=[];this.listeners={};this.classList={toggle(){}};this.dataset={};this.hidden=false;}setAttribute(k,v){this.attrs[k]=String(v);if(k==='d')this.geo=geometry(v);}getAttribute(k){return this.attrs[k];}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}addEventListener(k,fn){this.listeners[k]=fn;}getTotalLength(){return this.geo.length;}getPointAtLength(x){return this.geo.at(x);}getScreenCTM(){return{inverse(){return {};}};}setPointerCapture(){}showModal(){this.open=true;}close(){this.open=false;}focus(){}remove(){} }
-const els=new Map();const get=id=>{if(!els.has(id))els.set(id,new Element());return els.get(id);};const storage=new Map();const context={console,document:{getElementById:get,createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),querySelectorAll:()=>[],body:new Element(),addEventListener(){}},window:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:true}),setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},DOMPoint:class{constructor(x,y){this.x=x;this.y=y;}matrixTransform(){return this;}},confirm:()=>false};vm.createContext(context);const root=fs.existsSync(path.resolve(__dirname,'../dist'))?path.resolve(__dirname,'../dist'):path.resolve(__dirname,'..');for(const f of ['letters.js','scene.js','learning.js','accessibility.js','play.js','progress.js','studio.js','narration.js','rewards.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),context);
+const els=new Map();const get=id=>{if(!els.has(id))els.set(id,new Element());return els.get(id);};const storage=new Map();const context={console,document:{getElementById:get,createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),querySelectorAll:()=>[],body:new Element(),addEventListener(){}},window:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:true}),setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},DOMPoint:class{constructor(x,y){this.x=x;this.y=y;}matrixTransform(){return this;}},confirm:()=>false};vm.createContext(context);const root=fs.existsSync(path.resolve(__dirname,'../dist'))?path.resolve(__dirname,'../dist'):path.resolve(__dirname,'..');for(const f of ['letters.js','scene.js','learning.js','accessibility.js','play.js','pencil-shape.js','progress.js','studio.js','narration.js','rewards.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),context);
 const run=code=>vm.runInContext(code,context);let checks=0;const ok=(v,label)=>{assert.ok(v,label);checks++;};run('started=true;saved.sound=false;saved.animations=false;');
-function event(kind,p,id=1){get('board').listeners[kind]({clientX:p.x,clientY:p.y,pointerId:id,button:0,preventDefault(){}});}
+function event(kind,p,id=1){get('board').listeners[kind]({clientX:p.x,clientY:p.y,pointerId:id,type:kind,button:0,preventDefault(){}});}
 function traceStroke(points){event('pointerdown',points[0]);for(const p of points.slice(1))event('pointermove',p);event('pointerup',points.at(-1));}
 for(const difficulty of ['gentle','focused'])for(const letterCase of ['upper','lower'])for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){
  run(`current='${letter}';letterCase='${letterCase}';saved.difficulty='${difficulty}';render();`);
@@ -55,7 +55,7 @@ run('showProgress();');assert.ok(get('observation-rows').children.length);run("o
 run("attempt=null;current='L';render();var fakeNow=100000;Date.now=()=>fakeNow;lastEncouragement=0;observeError('starts');observeError('starts');observeError('starts');");assert.equal(spoken.at(-1).text,'You got this, Hargun. Take your time.');const speechCount=spoken.length;run("observeError('starts');");assert.equal(spoken.length,speechCount);run('observeTouch(samples[0][0]);fakeNow+=60;observeTouch(samples[0][2]);pauseObservation();fakeNow+=60000;observeTouch(samples[0][3]);');assert.equal(run('attempt.activeMs'),60);console.log('PASS: encouragement cooldown and idle time excluded from active tracing time.');
 
 const originalVoices=context.window.speechSynthesis.getVoices;context.window.speechSynthesis.getVoices=()=>[{name:'Other',lang:'en-US'},{name:'Sandy',lang:'en-GB'}];const beforeMissing=spoken.length;run('describe();');assert.equal(spoken.length,beforeMissing+1,'Another English voice speaks when Sandy US is absent');assert.equal(spoken.at(-1).voice.name,'Other');context.window.speechSynthesis.getVoices=originalVoices;run('describe();');assert.equal(spoken.at(-1).voice.name,'Sandy');assert.equal(spoken.at(-1).voice.lang,'en-US');
-run("current='A';render();setGuide('pencil');attempt=null;");event('pointerdown',{x:40,y:230});event('pointermove',{x:70,y:250});event('pointerup',{x:70,y:250});assert.ok(get('letter-paths').children.some(e=>e.attrs.class==='pencil-ink'&&e.attrs.d.includes('40')));assert.equal(run('progress'),0);assert.equal(run('attempt'),null,'Free exploration does not start a tracing observation');
+run("current='A';render();setGuide('pencil');attempt=null;");event('pointerdown',{x:40,y:230});event('pointermove',{x:70,y:250});event('pointerup',{x:70,y:250});assert.ok(get('letter-paths').children.some(e=>e.attrs.class==='pencil-ink'&&e.attrs.d.includes('40')));assert.equal(run('progress'),0);assert.ok(run('attempt.samples>0'),'Pencil records movement anywhere on the paper');
 run('helpCurrentStroke();');assert.equal(run('demoRunning'),false,'Hint keeps control with child');run('showDemo();');assert.equal(run('demoRunning'),true,'Watch runs full letter demonstration');run('stopDemo();');assert.equal(get('alphabet').children.length,26,'All letters live in one tray');
 const stat=run('dashboardStats([{samples:10,onLine:8,completed:true,activeMs:1500,helps:1},{samples:10,onLine:4,completed:false,activeMs:500,helps:2}])');assert.equal(stat.accuracy,60);assert.equal(stat.finished,1);assert.equal(stat.seconds,2);assert.equal(stat.help,3);run('observations=[];drawDashboard();');assert.equal(get('progress-dashboard').children[0].className,'chart-empty');console.log('PASS: automatic English speech, free pencil exploration, distinct hint/watch, continuous tray and chart aggregation.');
 for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')for(const kind of ['upper','lower']){assert.equal(run(`WATCH_SCRIPTS.${letter}.${kind}.length`),run(`LETTERS.${letter}.${kind}.length`));assert.ok(run(`WATCH_SCRIPTS.${letter}.${kind}.every(s=>s.includes('line'))`));}
@@ -76,3 +76,52 @@ for(const mode of ['trail','pencil'])for(const kind of ['upper','lower'])for(con
 run("current='L';letterCase='lower';setGuide('trail');render();");const midway=run('samples[0][45]');event('pointerdown',midway);assert.equal(run('drawing'),true,'Touch anywhere along active stroke is accepted');assert.equal(run('progress'),0,'Mid-stroke contact skips nothing');assert.equal(get('touch-feedback').attrs.visibility,'visible');event('pointerup',midway);
 run('render();');const offset=run('samples[0].map(p=>({x:p.x+20,y:p.y}))');traceStroke(offset);assert.equal(run('finished'),false,'Finish still needs close contact with endpoint');event('pointerdown',run('samples[0].at(-1)'));event('pointermove',run('({x:samples[0].at(-1).x,y:samples[0].at(-1).y-1})'));event('pointerup',run('samples[0].at(-1)'));assert.equal(run('finished'),true,'Broad stroke contact earns real movement progress');
 run("current='I';letterCase='lower';render();");traceStroke(run('samples[0]'));const dotPoint=run('samples[1][0]');for(let i=0;i<20;i++){event('pointerdown',dotPoint);event('pointerup',dotPoint);}assert.equal(run('finished'),false,'Even the dot stroke cannot be completed by repeated marker taps');traceStroke(run('samples[1]'));assert.equal(run('finished'),true);console.log('PASS: tap/stationary-event prevention across 52 forms and two modes, broad stroke contact, endpoint checks and dot-stroke movement.');
+
+// Pencil recognizes the child's complete shape, not ordered guide checkpoints.
+for(const level of ['gentle','focused'])for(const kind of ['upper','lower'])for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){
+ run(`current='${letter}';letterCase='${kind}';saved.difficulty='${level}';setGuide('pencil');render();`);
+ const template=run('samples.map(s=>s.map(p=>({...p})))');
+ for(const scale of [.55,1,1.4]){
+  context.testInk=template.slice().reverse().map(s=>s.slice().reverse().map((p,i)=>({x:(p.x-300)*scale+170+Math.sin(i/7)*2,y:(p.y-230)*scale+240+Math.cos(i/9)*2})));
+  const match=run('matchPencilShape(testInk,samples,saved.difficulty)');
+  assert.ok(match.pass,`${level} ${kind} ${letter} translated/scaled/reversed: ${JSON.stringify(match)}`);
+ }
+ // Real pointer handlers must also accept reordered/reversed, shifted strokes.
+ for(const s of template.slice().reverse())traceStroke(s.slice().reverse().map(p=>({x:p.x*.8-30,y:p.y*.8+35})));
+ assert.ok(run('finished'),`Pencil event recognition: ${kind} ${letter}`);
+ assert.equal(run('observations.at(-1).version'),3);
+ assert.ok(run('observations.at(-1).shapeMatch')>=93);
+}
+for(const letter of ['A','E','F','H','K','Q','R','T','X']){
+ run(`current='${letter}';letterCase='upper';setGuide('pencil');render();`);
+ const parts=run('samples.map(s=>s.map(p=>({...p})))');
+ for(let missing=0;missing<parts.length;missing++){
+  context.testInk=parts.filter((_,i)=>i!==missing);
+  assert.equal(run('matchPencilShape(testInk,samples).pass'),false,`${letter} missing part ${missing} must fail`);
+ }
+}
+for(const letter of ['I','J']){
+ run(`current='${letter}';letterCase='lower';render();`);
+ assert.equal(run('matchPencilShape([samples[0]],samples).pass'),false,'A missing dot fails');
+}
+run("current='O';letterCase='upper';render();");
+context.testInk=[[{x:200,y:80},{x:200,y:360}]];
+assert.equal(run('matchPencilShape(testInk,samples).pass'),false,'A line is not O');
+context.testInk=Array.from({length:12},(_,i)=>[{x:150,y:80+i*25},{x:450,y:80+i*25}]);
+assert.equal(run('matchPencilShape(testInk,samples).pass'),false,'A scribbled rectangle is not O');
+context.testInk=run('samples.map(s=>s.map(p=>({...p})))').flatMap(s=>[s,s,s]);
+assert.equal(run('matchPencilShape(testInk,samples).pass'),false,'Repeated overdraw is not a clean shape');
+run("saved.sound=true;describe();");
+assert.equal(spoken.at(-1).pitch,1.35,'Playful pitch retains automatic voice fallback');
+assert.equal(spoken.at(-1).rate,.7,'Letter speech stays slow');
+console.log('PASS: whole-shape Pencil matching for all 52 forms, two support levels, three sizes, translated/reversed strokes; missing parts, missing dots and scribbles rejected.');
+for(const [wanted,drawn,kind] of [['C','O','upper'],['O','C','upper'],['E','F','upper'],['F','E','upper'],['R','P','upper'],['P','R','upper'],['B','D','lower'],['D','B','lower']]){
+ run(`current='${drawn}';letterCase='${kind}';render();`);context.otherLetter=run('samples.map(s=>s.map(p=>({...p})))');
+ run(`current='${wanted}';render();`);
+ assert.equal(run('matchPencilShape(otherLetter,samples).pass'),false,`Drawing ${drawn} must not pass for ${wanted}`);
+}
+run("current='L';letterCase='upper';render();");
+context.otherLetter=run('samples.map(s=>s.map(p=>({x:600-p.x,y:p.y})))');
+assert.equal(run('matchPencilShape(otherLetter,samples).pass'),false,'Mirrored letters do not pass');
+assert.equal(run("dashboardStats([{mode:'pencil',shapeMatch:80,samples:5,onLine:0,activeMs:10,helps:0,completed:false}]).accuracy"),80,'Pencil charts use shape, not guide placement');
+console.log('PASS: confusable wrong-letter pairs, mirrored letters and shape-based parent metrics.');
