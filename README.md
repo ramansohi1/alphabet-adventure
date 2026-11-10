@@ -42,3 +42,6 @@ Raw ink stays in memory and is cleared on reset or changing letters. Up to 150 s
 ## Publishing
 
 GitHub Settings → Pages → Deploy from a branch → main → root. Keep private service credentials out of this public repository. A future remote recognizer would require a separate secured backend and a data-handling decision; this version sends no drawings to a service.
+
+## Free reliability update (v19)
+Recoverable speech failures replay the same prompt once using another available voice or the browser default. Cancellation and permission failures do not retry. Watch advances once after the eventual result. Original bundled SVG illustrations depict igloo, xylophone and zipper; queen and yarn now use matching pictures. No paid services, API keys or trial-only integrations were added. Device pronunciation and physical iPad audio still need listening checks.

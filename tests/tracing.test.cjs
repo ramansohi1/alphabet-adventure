@@ -164,3 +164,15 @@ run("current='E';render();");for(const s of manualF)manualStroke(s);firePencilPa
 run("current='F';render();");manualStroke(manualF[0]);const beforeExample=run('pencilStrokes.length');get('picture-examples').children[1].onclick();assert.equal(run('pencilStrokes.length'),beforeExample,'Picture changes preserve writing');assert.equal(run('currentExample().word'),'fish');
 for(const l of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){const examples=run(`letterExamples('${l}')`);assert.ok(examples.length>=2);assert.ok(examples.every(x=>x.word[0].toUpperCase()===l));}
 console.log('PASS: independent E/F drawings, three-second decision, no early reward, wrong-letter repair, undo recovery, partial-letter continuation and picture vocabulary.');
+
+// Free speech recovery: retry this prompt once, never revive canceled narration.
+context.window.speechSynthesis.getVoices=()=>[{name:'Samantha',lang:'en-US',voiceURI:'first'},{name:'Backup',lang:'en-US',voiceURI:'backup'}];
+run("saved.sound=true;unavailableVoices.clear();stopDemo();var speechDone=0,speechFailed=0;say('Test phrase.',()=>speechDone++,()=>speechFailed++);");
+const firstVoice=spoken.at(-1),countBeforeRetry=spoken.length;firstVoice.onerror({error:'voice-unavailable'});
+assert.equal(spoken.length,countBeforeRetry+1);assert.equal(spoken.at(-1).text,'Test phrase.');assert.equal(spoken.at(-1).voice.name,'Backup');
+firstVoice.onend();assert.equal(run('speechDone'),0,'Failed voice cannot also finish');spoken.at(-1).onend();assert.equal(run('speechDone'),1);
+run("unavailableVoices.clear();say('Bounded retry.',()=>speechDone++,()=>speechFailed++);");spoken.at(-1).onerror({error:'synthesis-failed'});const retryVoice=spoken.at(-1),retryCount=spoken.length;retryVoice.onerror({error:'synthesis-failed'});retryVoice.onerror({error:'synthesis-failed'});assert.equal(spoken.length,retryCount);assert.equal(run('speechFailed'),1);
+run("unavailableVoices.clear();say('Permission.',null,()=>speechFailed++);");const permissionCount=spoken.length;spoken.at(-1).onerror({error:'not-allowed'});assert.equal(spoken.length,permissionCount);
+run("say('Old letter.');");const canceledVoice=spoken.at(-1);run('cancelVoices()');const cancelCount=spoken.length;canceledVoice.onerror({error:'voice-unavailable'});assert.equal(spoken.length,cancelCount);
+for(const word of ['igloo','xylophone','zipper']){run(`setPicture($('word-emoji'),{word:'${word}',emoji:'?'});`);assert.equal(get('word-emoji').children[0].src,'pictures/'+word+'.svg');assert.ok(fs.existsSync(path.join(root,'pictures',word+'.svg')));}
+console.log('PASS: same-prompt fallback, bounded failures, stale callback prevention, permission handling and bundled picture assets.');
