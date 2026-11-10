@@ -77,3 +77,12 @@ button:active,.alphabet button:active{transform:none}.marker-pulse{animation:non
 #help.help-needed .action-icon{animation:bob 1.5s ease-in-out infinite}
 @media(max-height:550px){.card-footer{flex-basis:66px!important;padding:5px 10px!important}.card-footer .secondary{min-height:52px!important;flex-direction:row}.card-footer .action-icon{font-size:28px!important}}
 @media(max-width:500px){.card-footer{gap:8px!important;padding:6px 8px!important}.card-footer .secondary span:not(.action-icon){font-size:12px!important}.topbar .brand>span:not(.brand-icon){display:none}.card-header .practice-tools button span{display:none}.card-header .practice-tools button{min-width:48px;font-size:27px}}
+
+/* Repair controls and curated picture vocabulary. */
+.pencil-guide .card-footer{grid-template-columns:repeat(4,minmax(0,1fr))}
+#undo-pencil[hidden]{display:none!important}#undo-pencil{background:#f5ddff}
+#undo-pencil:disabled{opacity:.45;box-shadow:none;cursor:default}
+#picture-examples{display:flex;gap:4px;margin-right:auto}
+#picture-examples button{width:44px;height:44px;min-width:44px;border-radius:14px;background:#f4ebff;border:2px solid transparent;font-size:25px;padding:2px}
+#picture-examples button[aria-pressed=true]{border-color:#9160ce;background:#fff}
+@media(max-width:600px){#picture-examples{gap:2px}#picture-examples button{width:36px;min-width:36px;height:44px;font-size:22px}.card-header{gap:4px!important}.letter-word{gap:3px!important}.letter-word h2{font-size:21px!important}#word-emoji{display:none!important}}
