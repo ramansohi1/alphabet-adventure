@@ -29,8 +29,8 @@ context.localStorage.setItem=()=>{throw Error('Storage blocked');};run('save()')
 console.log(`PASS: ${checks} assertions; all 52 letter forms traced at both tolerance levels; endpoint/jump prevention, interruption recovery, multi-touch, dot strokes, duplicate rewards and storage failure checked.`);
 
 let spoken=[];context.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};context.window.speechSynthesis={getVoices(){return [{name:'Sandy',lang:'en-US',voiceURI:'sandy-us'}];},cancel(){},speak(u){spoken.push(u);}};
-run("current='C';saved.sound=true;describe();");assert.equal(spoken.at(-1).text,'See is for cat. car. cake.');
-const oldUtterance=spoken.at(-1);run("current='D';render();describe();");assert.equal(oldUtterance.onend,undefined,'Letter speech must not trigger animal sounds');assert.equal(spoken.at(-1).text,'Dee is for dog. duck. dinosaur.');
+run("current='C';saved.sound=true;describe();");assert.equal(spoken.at(-1).text,'See is for cat.');
+const oldUtterance=spoken.at(-1);run("current='D';render();describe();");assert.equal(typeof oldUtterance.onend,'function','Letter speech sequences examples');assert.equal(spoken.at(-1).text,'Dee is for dog.');
 run('saved.sound=false;startAdventure();');assert.equal(run('current'),'L');
 for(const letter of ['L','T','I']){assert.equal(run('current'),letter);for(const pts of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(pts);assert.ok(run('finished'));if(letter!=='I')run('nextAdventureLetter();');}
 assert.equal(run('adventure.done.length'),3);assert.equal(get('reward-title').textContent,'Three-letter superstar!');run('nextAdventureLetter();');assert.equal(run('adventure'),null);
@@ -44,11 +44,11 @@ console.log('PASS: dots practice records, non-demonstrating hints, less-practice
 
 assert.equal(run("spokenLetter('A')"),'A');run("saved.accent='en-GB';");assert.equal(run("spokenLetter('Z')"),'Zee');run("saved.hand='left';applyHandwritingSettings();");assert.equal(get('writing-guides').children.length,8);assert.equal(get('writing-guides').children[1].attrs['text-anchor'],'start');assert.equal(get('writing-guides').children[6].attrs.d,'M12 425 L588 425');run("saved.hand='right';applyHandwritingSettings();");assert.equal(get('writing-guides').children[1].attrs['text-anchor'],'start');console.log('PASS: American letter names and four guide lines with handed layouts.');
 
-run("current='G';saved.sound=true;describe();");assert.equal(spoken.at(-1).text,'Jee is for goat. grapes. guitar.');assert.equal(spoken.at(-1).onend,undefined);console.log('PASS: goat announcement ends without a sound-effect callback.');
+run("current='G';saved.sound=true;describe();");assert.equal(spoken.at(-1).text,'Jee is for goat.');assert.equal(typeof spoken.at(-1).onend,'function');console.log('PASS: goat announcement ends without a sound-effect callback.');
 
 run("saved.adaptive=false;current='A';randomBag=[];");const picks=new Set();for(let i=0;i<26;i++){const before=run('current');run('current=drawRandomLetter();');assert.notEqual(run('current'),before);picks.add(run('current'));}assert.equal(picks.size,26);
 run("current='L';letterCase='upper';render();setGuide('pencil');");for(const pts of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(pts);run('assessPencilShape()');assert.equal(run('finished'),true);assert.ok(get('letter-paths').children.some(e=>e.attrs.class==='pencil-ink'));
-for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){run(`current='${letter}';describe();`);assert.equal(spoken.at(-1).onend,undefined);}
+for(const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){run(`current='${letter}';describe();`);assert.equal(typeof spoken.at(-1).onend,'function');}
 assert.ok(!fs.readFileSync(path.join(root,'scene.js'),'utf8').includes('function playSceneSound'));console.log('PASS: shuffled cycle, fine pencil movement and no animal calls for all letters.');
 
 run("saved.adaptive=false;observations=[];attempt=null;current='L';letterCase='upper';setGuide('pencil');render();");for(const points of run('samples.map(p=>p.map(q=>({x:q.x,y:q.y})))'))traceStroke(points);run('assessPencilShape()');assert.equal(run('observations.length'),1);assert.equal(run('observations[0].completed'),true);assert.equal(run('observations[0].onLine'),run('observations[0].samples'));assert.equal(run('observations[0].mode'),'pencil');assert.match(get('line-coach').textContent,/sky/);assert.match(get('line-coach').textContent,/grass/);
@@ -185,9 +185,14 @@ console.log('PASS: same-prompt fallback, bounded failures, stale callback preven
 for(const l of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){
  run(`current='${l}';saved.sound=true;describe();`);
  const words=run('letterExamples().map(x=>x.word)');assert.equal(words.length,3,l+' has three distinct examples');
- for(const word of words)assert.ok(spoken.at(-1).text.includes(word),l+' automatically says '+word);
+ for(let i=0;i<words.length;i++){
+  assert.ok(spoken.at(-1).text.includes(words[i]),l+' automatically says '+words[i]);
+  if(i<words.length-1){const before=spoken.length;spoken.at(-1).onend();assert.equal(spoken.length,before,'No immediate next example');
+   const id=run('exampleSpeechTimer'),job=scheduled.get(id);assert.equal(job.ms,1000,'One full second of silence after speech ends');scheduled.delete(id);job.fn();
+  }else assert.equal(spoken.at(-1).onend,undefined,'Sequence ends after third example');
+ }
 }
-run("current='A';describe();");assert.equal(spoken.at(-1).text,'A. is for apple. ant. airplane.');
+run("current='A';describe();");assert.equal(spoken.at(-1).text,'A. is for apple.');
 for(const l of ['B','H']){
  run(`current='${l}';letterCase='lower';saved.sound=false;render();`);
  manualStroke([{x:225,y:80},{x:225,y:360}]);firePencilPause();
@@ -206,3 +211,12 @@ for(const test of variations){context.variationInk=test.ink;const result=run(`cl
  if(test.expected==='reject'||test.expected==='empty')assert.notEqual(result.state,'correct',test.name);
 }
 console.log('PASS: 31 independent variations: gaps, tilt, retracing, dots, stray ink, partial letters and wrong-letter rejection.');
+
+// Switching letters or beginning to draw cancels a pending example pause.
+run("current='A';saved.sound=true;describe();");spoken.at(-1).onend();
+const staleExampleJob=scheduled.get(run('exampleSpeechTimer'));
+run("current='B';render();describe();");const afterSwitch=spoken.length;
+staleExampleJob.fn();assert.equal(spoken.length,afterSwitch,'Old examples cannot interrupt a new letter');
+spoken.at(-1).onend();const drawJob=scheduled.get(run('exampleSpeechTimer'));
+run('cancelVoices()');drawJob.fn();assert.equal(spoken.length,afterSwitch,'Drawing cancels the example sequence');
+console.log('PASS: one-second example gaps and cancellation during the silent interval.');

@@ -46,11 +46,22 @@ function say(text, after, failed){
  return speakAttempt();
 }
 function describe(introduction=""){
- const words=letterExamples().map(item=>item.word);
- // One utterance avoids mobile speech-queue gaps; every pictured word is automatic.
- const name=current==='A'?'A.':spokenLetter(current);
- say(`${introduction}${name} is for ${words[0]}. ${words.slice(1).join('. ')}.`);
+ const letter=current,words=letterExamples().map(item=>item.word);
+ const name=letter==='A'?'A.':spokenLetter(letter);
+ // A real silent interval follows each completed utterance. Punctuation alone
+ // produces inconsistent pauses across device speech engines.
+ function speakExample(index){
+  say(index===0?`${introduction}${name} is for ${words[0]}.`:`${words[index]}.`,index<words.length-1?()=>{
+   const generation=speechGeneration;
+   exampleSpeechTimer=setTimeout(()=>{
+    exampleSpeechTimer=null;
+    if(generation===speechGeneration&&current===letter&&saved.sound)speakExample(index+1);
+   },1000);
+  }:undefined);
+ }
+ speakExample(0);
 }
+
 let alphabetPage=0;
 function updateAlphabet(page=Math.floor(Object.keys(LETTERS).indexOf(current)/6)){alphabetPage=page; $('alphabet').replaceChildren();for(const l of Object.keys(LETTERS)){const b=document.createElement('button');const glyph=document.createElement('span');glyph.textContent=letterCase==='upper'?l:l.toLowerCase();const picture=document.createElement('span');picture.className='letter-picture';setPicture(picture,LETTERS[l]);picture.setAttribute('aria-hidden','true');b.append(glyph,picture);b.className=(l===current?'active ':'')+(saved.completed.includes(`${letterCase}:${l}`)?'done':'');b.setAttribute('aria-label',`${letterCase==='upper'?'Uppercase':'Lowercase'} ${l}${saved.completed.includes(`${letterCase}:${l}`)?', completed':''}`);b.setAttribute('aria-pressed',String(l===current));b.onclick=()=>{if(trayMoved)return;unlockAudio();adventure=null;refreshAdventure();randomMode=false;updateRandomUI();current=l;render();describe();};$('alphabet').append(b);}
 $('letters-prev').disabled=page===0;$('letters-next').disabled=page===4;$('letters-page').textContent=Array.from({length:5},(_,i)=>i===page?'●':'○').join(' ');const count=new Set(saved.completed).size;$('sticker-count').textContent=count;const mastered=new Set(saved.completed.filter(x=>x.startsWith(letterCase+':'))).size;$('mastered').textContent=`${mastered} of 26 letters`;$('garden').value=mastered;revealCurrentLetter();}
