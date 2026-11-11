@@ -30,7 +30,7 @@ function say(text, after, failed){
  function speakAttempt(retried=false){
   if(generation!==speechGeneration)return;
   const u=new SpeechSynthesisUtterance(text),voice=selectedVoice();let settled=false;
-  if(voice)u.voice=voice;u.lang=voice?.lang||'en-US';u.rate=.80;u.pitch=1.05;fillVoices();
+  if(voice)u.voice=voice;u.lang=voice?.lang||'en-US';u.rate=.80;u.pitch=1;fillVoices();
   if(after)u.onend=()=>{if(!settled&&generation===speechGeneration){settled=true;after();}};
   u.onerror=e=>{
    if(settled||generation!==speechGeneration)return;settled=true;
@@ -45,7 +45,12 @@ function say(text, after, failed){
  }
  return speakAttempt();
 }
-function describe(introduction=""){const letter=current;say(`${introduction}${spokenLetter(letter)} is for ${currentExample().word}.`);}
+function describe(introduction=""){
+ const words=letterExamples().map(item=>item.word);
+ // One utterance avoids mobile speech-queue gaps; every pictured word is automatic.
+ const name=current==='A'?'A.':spokenLetter(current);
+ say(`${introduction}${name} is for ${words[0]}. ${words.slice(1).join('. ')}.`);
+}
 let alphabetPage=0;
 function updateAlphabet(page=Math.floor(Object.keys(LETTERS).indexOf(current)/6)){alphabetPage=page; $('alphabet').replaceChildren();for(const l of Object.keys(LETTERS)){const b=document.createElement('button');const glyph=document.createElement('span');glyph.textContent=letterCase==='upper'?l:l.toLowerCase();const picture=document.createElement('span');picture.className='letter-picture';setPicture(picture,LETTERS[l]);picture.setAttribute('aria-hidden','true');b.append(glyph,picture);b.className=(l===current?'active ':'')+(saved.completed.includes(`${letterCase}:${l}`)?'done':'');b.setAttribute('aria-label',`${letterCase==='upper'?'Uppercase':'Lowercase'} ${l}${saved.completed.includes(`${letterCase}:${l}`)?', completed':''}`);b.setAttribute('aria-pressed',String(l===current));b.onclick=()=>{if(trayMoved)return;unlockAudio();adventure=null;refreshAdventure();randomMode=false;updateRandomUI();current=l;render();describe();};$('alphabet').append(b);}
 $('letters-prev').disabled=page===0;$('letters-next').disabled=page===4;$('letters-page').textContent=Array.from({length:5},(_,i)=>i===page?'●':'○').join(' ');const count=new Set(saved.completed).size;$('sticker-count').textContent=count;const mastered=new Set(saved.completed.filter(x=>x.startsWith(letterCase+':'))).size;$('mastered').textContent=`${mastered} of 26 letters`;$('garden').value=mastered;revealCurrentLetter();}

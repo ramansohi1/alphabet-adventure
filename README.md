@@ -45,3 +45,10 @@ GitHub Settings → Pages → Deploy from a branch → main → root. Keep priva
 
 ## Free reliability update (v19)
 Recoverable speech failures replay the same prompt once using another available voice or the browser default. Cancellation and permission failures do not retry. Watch advances once after the eventual result. Original bundled SVG illustrations depict igloo, xylophone and zipper; queen and yarn now use matching pictures. No paid services, API keys or trial-only integrations were added. Device pronunciation and physical iPad audio still need listening checks.
+
+## Pencil and speech repair (v20)
+Pencil checks no longer freeze unfinished or uncertain writing. Lowercase partial letters remain drawable; page-length limits and Undo still bound scribbling. Stationary taps are retained as dots. Competing templates allow modest tilt and alternate A crossbar heights; tiny remote marks are ignored for scoring while remaining visible. Retracing the same shape is permitted. This remains a geometric practice aid, not a validated child-handwriting model.
+
+Selecting a letter automatically speaks all three pictured examples in one cancellable utterance. A is spoken as a standalone letter rather than the ambiguous spelling “Ay”. Natural US voices are preferred without pitch alteration, with other English voices and the existing error fallback retained. Actual pronunciation depends on installed voices and needs device listening checks. Watch uses short cues paired with animation.
+
+Run `node tests/tracing.test.cjs` for behavioral, vocabulary, speech sequencing, all-letter geometry and independent child-like regression cases. No API keys, remote recognition, or child-data uploads are introduced.

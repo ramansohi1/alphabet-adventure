@@ -1,9 +1,23 @@
 // Competing-letter classifier, deliberately independent of the prompted letter.
 // Geometric exemplar recognition, not a learned handwriting model or OCR service.
 const RECOGNITION_TEMPLATES=Object.fromEntries(Object.entries(RECOGNITION_POINTS).map(([kind,letters])=>[kind,Object.fromEntries(Object.entries(letters).map(([letter,strokes])=>[letter,[.7,.85,1,1.15,1.35,1.5].map(width=>strokes.map(s=>s.map(([x,y])=>({x:300+(x-300)*width,y}))))]))]));
+// Modest natural tilt and alternate A crossbar heights, for every competing letter.
+for(const [kind,letters] of Object.entries(RECOGNITION_TEMPLATES))for(const [letter,variants] of Object.entries(letters)){
+ if(kind==='upper'&&letter==='A')for(const template of [...variants])for(const y of [180,210]){
+  const bar=template[2],oldY=bar[0].y,factor=(y-80)/(oldY-80);
+  variants.push(template.map((s,i)=>i===2?s.map(p=>({x:300+(p.x-300)*factor,y})):s));
+ }
+ const originals=[...variants];for(const deg of [-12,-6,6,12])for(const template of originals){
+  const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+  variants.push(template.map(stroke=>stroke.map(p=>({x:300+(p.x-300)*c-(p.y-220)*s,y:220+(p.x-300)*s+(p.y-220)*c}))));
+ }
+}
 let recognitionCache={};
 function normalizeInk(strokes){
- const sampled=resampleShape(strokes,7),points=sampled.flat();
+ strokes=cleanPencilInk(strokes);
+ const sampled=resampleShape(strokes,7),points=[];
+ // Repeated pencil marks describe the same shape, not extra letter parts.
+ for(const p of sampled.flat())if(!points.some(q=>distance(p,q)<3))points.push(p);
  if(points.length<3)return null;
  const box=shapeBounds(points),length=shapeLength(strokes);
  if(box.size<24||length<20)return null;
@@ -23,7 +37,7 @@ function rankLetters(strokes,kind){
   for(const variant of variants){
    const forward=directedInkDistance(drawn.points,variant.ink.points),back=directedInkDistance(variant.ink.points,drawn.points);
    const ratio=drawn.length/variant.ink.length;
-   const penalty=Math.max(0,ratio-1.6)*.2+Math.max(0,.65-ratio)*.3;
+   const penalty=Math.max(0,.65-ratio)*.3;
    const score=Math.max(0,1-(forward.mean+back.mean)*3-(forward.far+back.far)*.15-penalty);
    if(score>result.score)result={letter,score,template:variant.strokes};
   }
@@ -43,7 +57,8 @@ function classifyPencil(strokes,wanted,kind,level='gentle'){
  else if(certain&&best.letter!==wanted){
   // A valid smaller letter can still be the beginning of the requested one.
   const extensions={E:['F','L'],F:['L'],R:['P'],Q:['O'],G:['C'],B:['P'],H:['I'],M:['N']};
-  const canContinue=(kind==='upper'&&(extensions[wanted]||[]).includes(best.letter))||(match.precision>=.92&&match.coverage<.9);
+  const lowerExtensions={B:['L','I'],H:['L','I','N'],D:['L','I','A'],P:['L','I'],Q:['A','L','I'],M:['N'],N:['I','L'],I:['L'],J:['I','L']};
+  const canContinue=(kind==='lower'&&(lowerExtensions[wanted]||[]).includes(best.letter))||(kind==='upper'&&(extensions[wanted]||[]).includes(best.letter))||(match.precision>=.92&&match.coverage<.9);
   if(canContinue)state='incomplete';
   else {state='different';recognized=best.letter;}
  }else if(match.precision>=.85&&match.coverage<.9)state='incomplete';

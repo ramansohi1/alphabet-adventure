@@ -1,5 +1,5 @@
 // Local geometric comparison, not OCR: compare actual ink with the requested
-// letter after translation and uniform scaling. Never rotate or mirror letters.
+// letter after translation and uniform scaling. Allow modest tilt, never mirror letters.
 // Raw strokes live only until this page is reset; only summary scores are saved.
 let pencilPauseTimer=null,pencilRevision=0,pencilCheckedRevision=-1,lastPencilCue=0;
 let pencilDecision=null,pencilLocked=false,pencilGestures=[],pencilGestureStart=0;
@@ -21,8 +21,14 @@ function shapeBounds(points){
  return {x:(left+right)/2,y:(top+bottom)/2,width:right-left,height:bottom-top,size:Math.max(right-left,bottom-top)};
 }
 function shapeLength(strokes){return strokes.reduce((sum,points)=>sum+points.slice(1).reduce((n,p,i)=>n+distance(p,points[i]),0),0);}
+// Ignore only tiny, distant accidental marks; preserve nearby dots and all substantial ink.
+function cleanPencilInk(strokes){
+ const main=strokes.filter(s=>shapeLength([s])>=8).flat();if(!main.length)return strokes;
+ const box=shapeBounds(main),reach=Math.max(25,box.size*.18);
+ return strokes.filter(s=>shapeLength([s])>=8||s.some(p=>(Math.abs(p.x-box.x)<=box.width/2+box.size*.15&&p.y<box.y&&p.y>=box.y-box.height/2-box.size*.6)||main.some(q=>distance(p,q)<=reach)));
+}
 function resampleShape(strokes,spacing=5){
- return strokes.filter(s=>s.length>1).map(points=>{
+ return strokes.filter(s=>s.length).map(points=>{
   const out=[points[0]];let carry=0;
   for(let i=1;i<points.length;i++){
    const a=points[i-1],b=points[i],d=distance(a,b);if(!d)continue;
@@ -35,6 +41,7 @@ function resampleShape(strokes,spacing=5){
 }
 function matchPencilShape(drawn,template,level='gentle'){
  const empty={pass:false,coverage:0,precision:0,score:0,parts:[],deviation:0};
+ drawn=cleanPencilInk(drawn);
  const ink=resampleShape(drawn),target=resampleShape(template);
  const raw=ink.flat(),goal=target.flat();
  if(raw.length<3||!goal.length)return empty;
@@ -52,11 +59,11 @@ function matchPencilShape(drawn,template,level='gentle'){
  const score=Math.max(0,Math.min(coverage,precision));
  // Per-part coverage matters: an i without its dot or a Q without its tail fails.
  const dotsPresent=target.filter(s=>shapeLength([s])<8).every(dot=>ink.some(s=>shapeLength([s])*scale<35&&s.some(p=>distance({x:(p.x-ib.x)*scale+tb.x,y:(p.y-ib.y)*scale+tb.y},dot[0])<=15)));
- const required=level==='focused'?.93:.90;const pass=dotsPresent&&coverage>=required&&precision>=required&&parts.every(p=>p>=(level==='focused'?.88:.84))&&ratio>=.72&&ratio<=1.65;
+ const required=level==='focused'?.93:.90;const pass=dotsPresent&&coverage>=required&&precision>=required&&parts.every(p=>p>=(level==='focused'?.88:.84))&&ratio>=.72;
  return {pass,coverage,precision,score,parts,alignment:{scale,ink:ib,target:tb},deviation:distances.reduce((a,b)=>a+b,0)/distances.length};
 }
 function finishPencilShape(type){
- if(pencilLive?.length>1)pencilStrokes.push(pencilLive);
+ if(pencilLive?.length){pencilStrokes.push(pencilLive);pencilRevision++;}
  pencilLive=null;
  if(type==='pointercancel'||type==='lostpointercapture'){cancelPencilPause();return;}
  if(pencilStrokes.length>pencilGestureStart)pencilGestures.push(pencilGestureStart);
@@ -69,7 +76,7 @@ function assessPencilShape(showHint=false){
  pencilMatch=pencilDecision.match;
  if(attempt){attempt.shapeMatch=Math.round(pencilMatch.score*100);attempt.shapeCoverage=Math.round(pencilMatch.coverage*100);attempt.shapePrecision=Math.round(pencilMatch.precision*100);attempt.version=4;attempt.recognition=pencilDecision.state;attempt.recognized=pencilDecision.recognized;}
  updatePencilFeedback();
- if(pencilDecision.state==='correct'&&!finished){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}else if(showHint){if(pencilDecision.state==='different')pencilLocked=true;updatePencilFeedback();showPencilCue();}
+ if(pencilDecision.state==='correct'&&!finished){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}else if(showHint){updatePencilFeedback();showPencilCue();}
 }
 function updatePencilFeedback(){
  $('undo-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: check my drawing':'Help: show the part to try');
@@ -104,12 +111,12 @@ function showPencilCue(){
  $('pencil-cue').replaceChildren();
  $('coach-bubble').hidden=false;
  $('coach-face').textContent=decision?.state==='different'?(letterCase==='lower'?decision.recognized.toLowerCase():decision.recognized):'🐻';
- let text=decision?.state==='different'?'Let’s make '+(letterCase==='lower'?current.toLowerCase():current):decision?.state==='incomplete'?'Keep drawing when you’re ready':'Watch, undo, or try again';
+ let text=decision?.state==='different'?'Let’s make '+(letterCase==='lower'?current.toLowerCase():current):decision?.state==='incomplete'?'Keep drawing when you’re ready':'Watch with me';
  $('coach-message').textContent=text;
  $('help').classList.toggle('help-needed',decision?.state==='uncertain');
  if(Date.now()-lastPencilCue>20000){
   lastPencilCue=Date.now();
-  say(decision?.state==='different'? 'That looks like '+spokenLetter(decision.recognized)+'. We’re making '+spokenLetter(current)+'. Undo the last line, or try a new page.':decision?.state==='incomplete'?'Keep drawing when you’re ready, Hargun.':'I’m not sure yet. You can watch, undo, or try a new page.');
+  say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?'Keep drawing when you’re ready, Hargun.':'Watch with me.');
  }
 }
 function undoPencil(){
