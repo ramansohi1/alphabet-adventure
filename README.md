@@ -52,3 +52,6 @@ Pencil checks no longer freeze unfinished or uncertain writing. Lowercase partia
 Selecting a letter automatically speaks all three pictured examples in a cancellable sequence, with one second of silence after each example finishes. A is spoken as a standalone letter rather than the ambiguous spelling “Ay”. Natural US voices are preferred without pitch alteration, with other English voices and the existing error fallback retained. Actual pronunciation depends on installed voices and needs device listening checks. Watch uses short cues paired with animation.
 
 Run `node tests/tracing.test.cjs` for behavioral, vocabulary, speech sequencing, all-letter geometry and independent child-like regression cases. No API keys, remote recognition, or child-data uploads are introduced.
+
+## Optional numbered Pencil coaching (v22)
+Pencil shows a purple 1, gold 2 and direction arrow for one suggested stroke at a time. Help speaks the next short tip; Watch demonstrates each numbered route. Loops return to 1 and dot strokes use one marker. Tips are optional in grown-up practice settings and fade while drawing. They never feed recognition, create ink, or require touching checkpoints. Three-second whole-shape assessment and free drawing remain unchanged.

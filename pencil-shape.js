@@ -4,7 +4,7 @@
 let pencilPauseTimer=null,pencilRevision=0,pencilCheckedRevision=-1,lastPencilCue=0;
 let pencilDecision=null,pencilLocked=false,pencilGestures=[],pencilGestureStart=0;
 let pencilStrokes=[],pencilLive=null,pencilMatch=null,pencilBest=0;
-function resetPencilShape(){pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
+function resetPencilShape(){pencilTip=0;pencilShownTip=0;pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
 function beginPencilShape(p){pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
 function recordPencilShape(p){
  if(!pencilLive)return;
@@ -79,7 +79,8 @@ function assessPencilShape(showHint=false){
  if(pencilDecision.state==='correct'&&!finished){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}else if(showHint){updatePencilFeedback();showPencilCue();}
 }
 function updatePencilFeedback(){
- $('undo-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: check my drawing':'Help: show the part to try');
+ $('undo-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear the next drawing tip':'Help: show the part to try');
+ drawPencilDirections();
  if(guideMode!=='pencil')return;
  $('steps').replaceChildren();
  const status=document.createElement('span');status.textContent=finished?'★':pencilLocked?'↶':'✏️';$('steps').append(status);

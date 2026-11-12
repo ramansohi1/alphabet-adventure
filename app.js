@@ -6,7 +6,7 @@ let saved = { completed:[], sound:true, animations:!matchMedia('(prefers-reduced
 let storageOK = true;
 try { const previous=JSON.parse(localStorage.getItem(KEY)); if(previous && typeof previous==='object') {
  saved.completed=Array.isArray(previous.completed)?previous.completed.filter(x=>/^(upper|lower):[A-Z]$/.test(x)):[];
- for(const k of ['sound','animations','music','adaptive']) if(typeof previous[k]==='boolean') saved[k]=previous[k];
+ for(const k of ['sound','animations','music','adaptive','pencilDirections']) if(typeof previous[k]==='boolean') saved[k]=previous[k];
  if(['left','right'].includes(previous.hand))saved.hand=previous.hand;
  if(typeof previous.lines==='boolean')saved.lines=previous.lines;
  if(['en-US','en-GB'].includes(previous.accent))saved.accent=previous.accent;
@@ -83,7 +83,7 @@ function advance(p,from){const pts=samples[stroke];if(!pts||!from)return false;c
  if(progress===pts.length-1&&strokeTravel>=length*.65&&distance(p,pts.at(-1))<=Math.min(18,limit)){completeStroke();return true;}markStart();return false;}
 function completeStroke(){$('touch-feedback').setAttribute('visibility','hidden');document.body.classList.toggle('hint-active',false);document.body.classList.toggle('is-tracing',false);inks[stroke].setAttribute('stroke-dashoffset',0);stroke++;progress=0;movementCredit=0;strokeTravel=0;drawing=false;lastPoint=null;updateSteps();if(stroke!==paths.length)chime('stroke');if(stroke===paths.length){completeLetter();return;}markStart();$('instruction').textContent=`Lovely! Lift your finger, then start stroke ${stroke+1}`;$('hint').textContent='Lift your finger. Find the next glowing dot.';$('stroke-label').textContent=`${stroke} of ${paths.length} strokes complete`;$('friend-heading').textContent='Look at you grow!';$('friend-saying').textContent='That was a lovely line. Now find the next dot.';tinyReward();}
 function tinyReward(){if(!saved.animations)return;const el=document.createElement('div');el.className='tiny-reward';el.textContent=['⭐','🌟','✨','💜'][Math.floor(Math.random()*4)];$('particles').append(el);setTimeout(()=>el.remove(),1350);}
-function completeLetter(){cancelPencilPause();drawing=false;document.body.classList.toggle('is-tracing',false);endAttempt(true);recordPractice();finished=true;$('start-marker').replaceChildren();$('direction').replaceChildren();$('instruction').textContent='You did it! Every stroke is complete.';$('hint').textContent='';const key=`${letterCase}:${current}`;const isNew=!saved.completed.includes(key);if(isNew)saved.completed.push(key);save();updateAlphabet();const letter=letterCase==='upper'?current:current.toLowerCase();setPicture($('reward-animal'),currentExample());$('reward-title').textContent=`You made ${letter}!`;$('reward-text').textContent=isNew?'A new friend for your sticker garden.':'Your letter is growing stronger. Lovely practice!';$('friend-heading').textContent='A little alphabet star!';$('friend-saying').textContent='You followed every trail. I’m so happy to learn with you.';$('stroke-label').textContent='All strokes complete';adventureReward();prepareReward(letter);const completed=current;
+function completeLetter(){$('pencil-directions').replaceChildren();cancelPencilPause();drawing=false;document.body.classList.toggle('is-tracing',false);endAttempt(true);recordPractice();finished=true;$('start-marker').replaceChildren();$('direction').replaceChildren();$('instruction').textContent='You did it! Every stroke is complete.';$('hint').textContent='';const key=`${letterCase}:${current}`;const isNew=!saved.completed.includes(key);if(isNew)saved.completed.push(key);save();updateAlphabet();const letter=letterCase==='upper'?current:current.toLowerCase();setPicture($('reward-animal'),currentExample());$('reward-title').textContent=`You made ${letter}!`;$('reward-text').textContent=isNew?'A new friend for your sticker garden.':'Your letter is growing stronger. Lovely practice!';$('friend-heading').textContent='A little alphabet star!';$('friend-saying').textContent='You followed every trail. I’m so happy to learn with you.';$('stroke-label').textContent='All strokes complete';adventureReward();prepareReward(letter);const completed=current;
  celebrationTimer=setTimeout(()=>{if(!finished||current!==completed)return;$('celebrate').hidden=false;confetti();if(sessionLetters%2)chime('letter');praiseMilestone();$('reward-animal').focus({preventScroll:true});},900);}
 function confetti(){screenConfetti();celebrationStars();}
 
@@ -124,3 +124,6 @@ function touchFeedback(p){const dot=$('touch-feedback');dot.setAttribute('cx',p.
 $('word-emoji').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('hear').onclick();}});
 
 $('undo-pencil').onclick=()=>{unlockAudio();undoPencil();};
+
+$('pencil-directions-choice').checked=saved.pencilDirections!==false;
+$('pencil-directions-choice').onchange=e=>{saved.pencilDirections=e.target.checked;save();drawPencilDirections();};

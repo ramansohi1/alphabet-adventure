@@ -88,3 +88,5 @@ button:active,.alphabet button:active{transform:none}.marker-pulse{animation:non
 @media(max-width:600px){#picture-examples{gap:2px}#picture-examples button{width:36px;min-width:36px;height:44px;font-size:22px}.card-header{gap:4px!important}.letter-word{gap:3px!important}.letter-word h2{font-size:21px!important}#word-emoji{display:none!important}}
 
 .word-picture{display:inline-block;width:1em;height:1em;object-fit:contain;vertical-align:middle;pointer-events:none}#picture-examples .word-picture{width:30px;height:30px}#reward-animal .word-picture{width:1em;height:1em}
+
+#pencil-directions{pointer-events:none}.is-tracing #pencil-directions{opacity:.35}body:not(.pencil-guide) #pencil-directions{display:none}
