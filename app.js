@@ -115,7 +115,7 @@ $('practice-dots').onclick=()=>{render();setGuide('dots');say('Try following the
 $('break-button').onclick=takeBreak;
 $('adventure-start').onclick=()=>{unlockAudio();startAdventure();};
 $('animal-sound').hidden=true;
-$('start').onclick=()=>{started=true;document.body.classList.toggle('playing',true);unlockAudio();$('welcome').close();describe('Hargun, are you ready to have fun? ');};$('welcome').addEventListener('cancel',e=>e.preventDefault());
+$('start').onclick=()=>{started=true;document.body.classList.toggle('playing',true);unlockAudio();$('welcome').close();describe('Noah, are you ready to have fun? ');};$('welcome').addEventListener('cancel',e=>e.preventDefault());
 document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseForDialog();if(audio?.state==='running')audio.suspend().catch(()=>{});}});
 document.body.classList.toggle('no-motion',!saved.animations);soundUI();initAccessibility();initPlayTools();initProgress();initStudio();initRewardPlay();render();$('welcome').showModal();
 

@@ -117,7 +117,7 @@ function showPencilCue(){
  $('help').classList.toggle('help-needed',decision?.state==='uncertain');
  if(Date.now()-lastPencilCue>20000){
   lastPencilCue=Date.now();
-  say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?'Keep drawing when you’re ready, Hargun.':'Watch with me.');
+  say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?'Keep drawing when you’re ready, Noah.':'Watch with me.');
  }
 }
 function undoPencil(){

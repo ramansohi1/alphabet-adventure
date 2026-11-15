@@ -7,7 +7,7 @@ function queuePencilRestart(){
  cancelPencilPause();if(pencilLive?.length>1){pencilStrokes.push(pencilLive);pencilGestures.push(pencilGestureStart);}
  pencilLive=null;pencilLocked=true;drawing=false;activePointer=null;pencilTry=null;pauseObservation();
  $('coach-bubble').hidden=false;$('coach-face').textContent='🌱';$('coach-message').textContent='Undo or try a new page';
- say('Let’s try undo, or a new page, Hargun.');updatePencilFeedback();
+ say('Let’s try undo, or a new page, Noah.');updatePencilFeedback();
 }
 function pencilTravel(p){
  if(!pencilTry||guideMode!=='pencil')return false;
