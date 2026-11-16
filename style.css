@@ -115,3 +115,8 @@ dialog{touch-action:pan-y}input,textarea{touch-action:manipulation;-webkit-user-
 @keyframes picture-wiggle{30%{transform:rotate(-7deg) translateY(-5px)}70%{transform:rotate(7deg) translateY(-5px)}}
 .no-motion #picture-game-choices button{animation:none}
 @media(prefers-reduced-motion:reduce){#picture-game-choices button{animation:none}}
+
+/* Watch leaves a wider colored model below the child's dark pencil marks. */
+.watch-guide-line{fill:none;stroke:#9661d2;stroke-width:11;stroke-opacity:.55;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#watch-guide{display:none}
+.pencil-guide #watch-guide{display:block}

@@ -77,3 +77,8 @@ Run `node tests/pencil-coaching.test.cjs` and `node tests/tracing.test.cjs`. The
 Letter introductions now say “Let's write” and lead into drawing guidance. The three examples appear as a listening game after writing: one spoken question, friendly naming after another choice, a visual hint, and a short letter/word response for the matching picture. Targets rotate across the three examples per letter and case within the current visit. The next-letter arrow is always available; the game adds no penalties and does not gate earned stickers. Muted play has visual prompts and hints; reduced-motion settings disable the picture wiggle. This replaces the automatic three-example sequence described in v20 and removes the extra picture row while writing.
 
 Run `node tests/picture-game.test.cjs` for 887 focused checks across all 52 forms. These checks passed in the isolated JavaScript runtime. Full browser and physical-device verification remain pending.
+
+## Watch comparison guide (v28)
+In Pencil mode, Watch animates a wider translucent purple model beneath the child's dark ink. Completed model strokes stay visible for comparison and continued drawing. Replaying Watch starts a fresh model; New page and letter changes clear it. The model is a separate, non-interactive SVG layer and never enters recognition or earned progress. Watching a completed Pencil page preserves the child's ink and returns to its reward afterward.
+
+`node tests/watch-guide.test.cjs` covers 410 checks for all 52 forms, retained model strokes, cancellation, resets, finished-page preservation and unchanged crayon behavior. The focused checks passed in an isolated JavaScript runtime; physical-device visual and speech checks remain pending.
