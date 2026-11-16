@@ -228,7 +228,7 @@ for(const kind of ['upper','lower'])for(const l of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
   run('pencilTipHelp()');assert.ok(get('pencil-directions').children.length>=2);assert.match(get('coach-message').textContent,/1/);
   assert.equal(run('pencilStrokes.length'),0);assert.equal(run('finished'),false);
  }
- assert.equal(run('pencilTip'),0,'Tips repeat without affecting progress');
+ assert.equal(run('pencilTip'),0,'Help repeats the current step without affecting progress');
  run('saved.pencilDirections=false;drawPencilDirections()');assert.equal(get('pencil-directions').children.length,0);
 }
 console.log('PASS: optional numbered coaching for all 52 forms never earns progress or creates ink.');
@@ -256,3 +256,15 @@ run("current='A';render();");pending.shift()();assert.equal(run('finished'),fals
 run("current='L';render();");traceStroke(run('samples[0]'));get('check-pencil').onclick();run('pauseForDialog()');pending.shift()();assert.equal(run('finished'),false);
 run('schedulePencilPause()');assert.ok(run('pencilPauseTimer'),'Interrupted async check can resume');
 console.log('PASS: Help resume, explicit Check, mode preservation, no checkpoints, custom/blank/Unicode names, no Undo, stale async result rejection.');
+
+// Pencil releases automatically advance coaching while Trace checkpoints stay separate.
+run("current='H';letterCase='lower';saved.sound=false;saved.pencilDirections=true;setGuide('pencil');render();");
+traceStroke(run('samples[0]'));
+assert.equal(run('pencilTip'),1,'h stem advances the numbered guide to its hump');
+assert.equal(run('pencilShownTip'),1);assert.equal(run('stroke'),0);
+assert.equal(run('finished'),false,'One part does not reward the whole letter');
+run('pencilTipHelp()');assert.equal(run('pencilTip'),1,'Help repeats the current part');
+traceStroke(run('samples[1]'));assert.equal(run('pencilTip'),2);
+assert.equal(run('finished'),false,'Guide completion still waits for recognition');
+run('render()');assert.equal(run('pencilTip'),0);assert.equal(run('pencilGuideDone.length'),0);
+console.log('PASS: Pencil release advances h guidance, Help repeats, and reset clears coaching progress.');

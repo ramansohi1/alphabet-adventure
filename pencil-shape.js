@@ -5,7 +5,7 @@ let pencilEpoch=0,pencilChecking=false;
 let pencilPauseTimer=null,pencilRevision=0,pencilCheckedRevision=-1,lastPencilCue=0;
 let pencilDecision=null,pencilLocked=false,pencilGestures=[],pencilGestureStart=0;
 let pencilStrokes=[],pencilLive=null,pencilMatch=null,pencilBest=0;
-function resetPencilShape(){pausePencilRecognition();pencilTip=0;pencilShownTip=0;pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
+function resetPencilShape(){pausePencilRecognition();pencilTip=0;pencilShownTip=0;pencilGuideDone=[];pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
 function beginPencilShape(p){pausePencilRecognition();pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
 function recordPencilShape(p){
  if(!pencilLive)return;
@@ -87,7 +87,7 @@ function assessPencilShape(showHint=false){
 }
 
 function updatePencilFeedback(){
- $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear the next drawing tip':'Help: show the part to try');
+ $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear this drawing step':'Help: show the part to try');
  drawPencilDirections();
  if(guideMode!=='pencil')return;
  $('steps').replaceChildren();

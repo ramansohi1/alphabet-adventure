@@ -54,7 +54,7 @@ Selecting a letter automatically speaks all three pictured examples in a cancell
 Run `node tests/tracing.test.cjs` for behavioral, vocabulary, speech sequencing, all-letter geometry and independent child-like regression cases. No API keys, remote recognition, or child-data uploads are introduced.
 
 ## Optional numbered Pencil coaching (v22)
-Pencil shows a purple 1, gold 2 and direction arrow for one suggested stroke at a time. Help speaks the next short tip; Watch demonstrates each numbered route. Loops return to 1 and dot strokes use one marker. Tips are optional in grown-up practice settings and fade while drawing. They never feed recognition, create ink, or require touching checkpoints. Three-second whole-shape assessment and free drawing remain unchanged.
+Pencil shows a purple 1, gold 2 and direction arrow for one suggested stroke at a time. Help repeats the current short tip; Watch demonstrates each numbered route. Loops return to 1 and dot strokes use one marker. Tips are optional in grown-up practice settings and fade while drawing. They never feed recognition, create ink, or require touching checkpoints. Three-second whole-shape assessment and free drawing remain unchanged.
 
 
 ## Pencil reliability and child input (v24)
@@ -65,3 +65,10 @@ Pencil shows a purple 1, gold 2 and direction arrow for one suggested stroke at 
 - The welcome screen asks for an optional name, saved locally and used for greetings/praise. Blank names get neutral encouragement. Names do not create separate progress profiles.
 - Child play suppresses multi-touch page gestures, selection, drag, and callouts; the decorative logo no longer navigates. Name entry and settings retain normal editing/scrolling. Websites cannot disable OS app switching or browser chrome. Use device-level Guided Access/app pinning for supervised single-app sessions.
 - Physical iPad/Safari speech, actual touch, and diverse child handwriting still require validation. No ink or names are uploaded to a backend.
+
+## Automatic Pencil steps (v25)
+After a normal finger lift, numbered coaching advances past routes already covered by the child's ink and speaks the next short direction. Small gaps, wobbles, reversed strokes and out-of-order parts are allowed. Help repeats the current part; Watch restores it after demonstrating. New page and letter changes reset coaching.
+
+This spatial check only moves optional hints near the displayed routes. It neither creates ink nor awards progress. Free drawing away from the routes still uses the existing position- and size-independent whole-letter recognition. Endpoint taps alone do not complete a line.
+
+Run `node tests/pencil-coaching.test.cjs` and `node tests/tracing.test.cjs`. The v25 focused geometry/coaching checks passed in an isolated JavaScript runtime; the full Node harness and browser/device checks still need to run for this revision.
