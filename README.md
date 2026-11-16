@@ -72,3 +72,8 @@ After a normal finger lift, numbered coaching advances past routes already cover
 This spatial check only moves optional hints near the displayed routes. It neither creates ink nor awards progress. Free drawing away from the routes still uses the existing position- and size-independent whole-letter recognition. Endpoint taps alone do not complete a line.
 
 Run `node tests/pencil-coaching.test.cjs` and `node tests/tracing.test.cjs`. The v25 focused geometry/coaching checks passed in an isolated JavaScript runtime; the full Node harness and browser/device checks still need to run for this revision.
+
+## Find the picture (v27)
+Letter introductions now say “Let's write” and lead into drawing guidance. The three examples appear as a listening game after writing: one spoken question, friendly naming after another choice, a visual hint, and a short letter/word response for the matching picture. Targets rotate across the three examples per letter and case within the current visit. The next-letter arrow is always available; the game adds no penalties and does not gate earned stickers. Muted play has visual prompts and hints; reduced-motion settings disable the picture wiggle. This replaces the automatic three-example sequence described in v20 and removes the extra picture row while writing.
+
+Run `node tests/picture-game.test.cjs` for 887 focused checks across all 52 forms. These checks passed in the isolated JavaScript runtime. Full browser and physical-device verification remain pending.

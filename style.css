@@ -98,3 +98,20 @@ dialog{touch-action:pan-y}input,textarea{touch-action:manipulation;-webkit-user-
 #welcome h2,#welcome p,#welcome small{display:block}#welcome{width:min(400px,92vw)}
 #welcome label{display:block;margin:12px 0 6px}#player-name{display:block;width:100%;box-sizing:border-box;border:2px solid #cbb7e8;border-radius:14px;padding:12px;font:inherit;font-size:20px;background:white;color:#534c58}
 #welcome .welcome-art{height:80px}#welcome .primary{margin-top:16px;min-height:60px}
+
+/* Pictures become a small, optional listening game after writing. */
+#picture-examples{display:none!important}
+#picture-game[hidden]{display:none!important}
+.celebrate.picture-game-active{overflow:auto;justify-content:center;padding:12px}
+.picture-game-active #reward-animal,.picture-game-active .reward-letter,.picture-game-active .reward-pop-stars,.picture-game-active .picture-prompt,.picture-game-active .reward-sky{display:none!important}
+#picture-game{width:min(100%,440px);text-align:center}
+#picture-game-prompt{font-size:clamp(16px,3vw,22px);font-weight:700;color:#65428a}
+#picture-game-choices{display:flex;gap:12px;justify-content:center;margin:12px 0}
+#picture-game-choices button{width:clamp(64px,18vw,104px);height:clamp(64px,18vw,104px);min-width:64px;min-height:64px;background:white;border:3px solid #dec9ee;border-radius:20px;font-size:clamp(38px,9vw,64px);padding:6px}
+#picture-game-hear,#picture-game-next{min-width:52px;min-height:44px;margin:6px;font-size:24px}
+#picture-game-choices .picture-hint{border-color:#af7ad6;animation:picture-wiggle .7s ease-in-out 2}
+#picture-game-choices .picture-found{border-color:#6cad78;background:#eefbe9;animation:picture-wiggle .7s ease-in-out}
+.picture-game-active h3{font-size:18px;margin:6px 0}
+@keyframes picture-wiggle{30%{transform:rotate(-7deg) translateY(-5px)}70%{transform:rotate(7deg) translateY(-5px)}}
+.no-motion #picture-game-choices button{animation:none}
+@media(prefers-reduced-motion:reduce){#picture-game-choices button{animation:none}}

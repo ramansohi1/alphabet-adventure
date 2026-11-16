@@ -9,7 +9,7 @@ function updateExamples(){
  $('picture-examples').replaceChildren();
  for(const [i,item] of letterExamples().entries()){
   const b=document.createElement('button');setPicture(b,item);b.setAttribute('aria-label',current+' is for '+item.word);b.setAttribute('aria-pressed',String(i===(exampleChoices[current]||0)));
-  b.onclick=()=>{if(demoRunning||finished)return;unlockAudio();exampleChoices[current]=i;updateExamples();describe();};$('picture-examples').append(b);
+  b.onclick=()=>{if(demoRunning||finished)return;unlockAudio();exampleChoices[current]=i;updateExamples();say(spokenLetter(current)+' is for '+item.word+'.');};$('picture-examples').append(b);
  }
 }
 
@@ -19,4 +19,42 @@ function setPicture(host,item){
  if(['igloo','xylophone','zipper','quilt'].includes(item.word)){
   const picture=document.createElement('img');picture.src='pictures/'+item.word+'.svg';picture.alt='';picture.setAttribute('aria-hidden','true');picture.className='word-picture';picture.draggable=false;host.append(picture);
  }else host.textContent=item.emoji;
+}
+
+let pictureGame=null;
+const pictureTurns={};
+function resetPictureGame(){pictureGame=null;$('picture-game').hidden=true;$('celebrate').classList.toggle('picture-game-active',false);}
+function startPictureGame(){
+ const key=letterCase+':'+current,items=letterExamples();
+ const target=(pictureTurns[key]||0)%items.length;pictureTurns[key]=target+1;
+ pictureGame={key,letter:current,items,target,solved:false};
+ $('celebrate').classList.toggle('picture-game-active',true);$('picture-game').hidden=false;
+ $('picture-game-choices').replaceChildren();
+ items.forEach((item,index)=>{
+  const button=document.createElement('button');button.type='button';setPicture(button,item);
+  button.setAttribute('aria-label',item.word);
+  button.onclick=()=>choosePicture(index);
+  $('picture-game-choices').append(button);
+ });
+ $('picture-game-prompt').textContent='Can you find the '+items[target].word+'?';
+ $('picture-game-hear').onclick=()=>{unlockAudio();say($('picture-game-prompt').textContent);};
+ $('picture-game-next').onclick=()=>{unlockAudio();nextAdventureLetter();};
+ say(personal('You did it!')+' '+$('picture-game-prompt').textContent);
+ $('picture-game-hear').focus({preventScroll:true});
+}
+function choosePicture(index){
+ const game=pictureGame;
+ if(!game||!finished||game.key!==letterCase+':'+current||game.solved)return;
+ const item=game.items[index];if(!item)return;
+ unlockAudio();
+ const buttons=$('picture-game-choices').children;
+ if(index===game.target){
+  game.solved=true;
+  buttons[index].classList.toggle('picture-found',true);
+  $('picture-game-prompt').textContent=item.word+'! '+game.letter+' is for '+item.word+'.';
+  say(item.word+'! '+spokenLetter(game.letter)+' is for '+item.word+'.');
+ }else{
+  say(item.word+'. Can you find the '+game.items[game.target].word+'?');
+  buttons[game.target].classList.toggle('picture-hint',true);
+ }
 }
