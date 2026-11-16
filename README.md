@@ -6,8 +6,8 @@ A static, touch-friendly letter practice site for GitHub Pages. The published si
 
 - Trace teaches ordered strokes; Watch animates and narrates all 52 print forms using sky, plane, grass and worm lines.
 - Pencil captures real ink anywhere on the paper, allowing different positions, sizes and stroke orders. After three seconds of stillness it compares the shape with all 26 letters in the chosen case, independent of the prompt. A reward needs a clear best candidate plus coverage, precision, component and length checks.
-- A likely unfinished letter remains writable. A clearly different letter pauses for Undo or New page. Uncertain work receives a gentle suggestion and no success reward. No glowing preset-point corrections in Pencil.
-- Undo removes one drawn gesture. Sixteen drawn gestures or an excessive path length pauses the page for explicit repair; work is not silently erased. Taps do not earn progress.
+- A likely unfinished letter remains writable. A clearly different letter pauses for New page. Uncertain work receives a gentle suggestion and no success reward. No glowing preset-point corrections in Pencil.
+- Sixteen drawn gestures or an excessive path length pauses the page for explicit repair; work is not silently erased. Taps do not earn progress.
 - Two or three bundled picture examples per letter can be tapped without resetting writing. Pictures use device emoji, not a live image API.
 - Reward appears 900ms after recognition, and the child chooses when to continue.
 - Parent charts separate Trace and Pencil observations and show recognition outcomes. Version-4 Pencil summaries exclude incompatible older records from current charts, without deleting saved stickers.
@@ -31,7 +31,7 @@ In this development workspace web files live in `dist`; the published GitHub rep
 
 ## Validation
 
-Behavioral tests cover all 52 forms at two support levels, transformed and reversed ink, missing components/dots, mirrored and confusable letters, stationary taps, canceled pointers, speech fallback, narrated Watch sequences, idle timer teardown and delayed rewards. Independent hand-authored E/F fixtures cover wrong-letter detection, partial E continuation, delayed assessment and undo repair. Browser checks complement this harness; it is not physical iPad/Safari or child usability validation.
+Behavioral tests cover all 52 forms at two support levels, transformed and reversed ink, missing components/dots, mirrored and confusable letters, stationary taps, canceled pointers, speech fallback, narrated Watch sequences, idle timer teardown and delayed rewards. Independent hand-authored E/F fixtures cover wrong-letter detection, partial E continuation, delayed assessment and new-page retry. Browser checks complement this harness; it is not physical iPad/Safari or child usability validation.
 
 ## Voice, privacy and storage
 
@@ -47,7 +47,7 @@ GitHub Settings → Pages → Deploy from a branch → main → root. Keep priva
 Recoverable speech failures replay the same prompt once using another available voice or the browser default. Cancellation and permission failures do not retry. Watch advances once after the eventual result. Original bundled SVG illustrations depict igloo, xylophone and zipper; queen and yarn now use matching pictures. No paid services, API keys or trial-only integrations were added. Device pronunciation and physical iPad audio still need listening checks.
 
 ## Pencil and speech repair (v20)
-Pencil checks no longer freeze unfinished or uncertain writing. Lowercase partial letters remain drawable; page-length limits and Undo still bound scribbling. Stationary taps are retained as dots. Competing templates allow modest tilt and alternate A crossbar heights; tiny remote marks are ignored for scoring while remaining visible. Retracing the same shape is permitted. This remains a geometric practice aid, not a validated child-handwriting model.
+Pencil checks no longer freeze unfinished or uncertain writing. Lowercase partial letters remain drawable; page-length limits and New page still bound scribbling. Stationary taps are retained as dots. Competing templates allow modest tilt and alternate A crossbar heights; tiny remote marks are ignored for scoring while remaining visible. Retracing the same shape is permitted. This remains a geometric practice aid, not a validated child-handwriting model.
 
 Selecting a letter automatically speaks all three pictured examples in a cancellable sequence, with one second of silence after each example finishes. A is spoken as a standalone letter rather than the ambiguous spelling “Ay”. Natural US voices are preferred without pitch alteration, with other English voices and the existing error fallback retained. Actual pronunciation depends on installed voices and needs device listening checks. Watch uses short cues paired with animation.
 
@@ -55,3 +55,13 @@ Run `node tests/tracing.test.cjs` for behavioral, vocabulary, speech sequencing,
 
 ## Optional numbered Pencil coaching (v22)
 Pencil shows a purple 1, gold 2 and direction arrow for one suggested stroke at a time. Help speaks the next short tip; Watch demonstrates each numbered route. Loops return to 1 and dot strokes use one marker. Tips are optional in grown-up practice settings and fade while drawing. They never feed recognition, create ink, or require touching checkpoints. Three-second whole-shape assessment and free drawing remain unchanged.
+
+
+## Pencil reliability and child input (v24)
+- Numbered routes are optional visual coaching, never recognition checkpoints. Pencil input no longer enters the Trace handler at all.
+- Check explicitly assesses the whole drawing. Automatic assessment waits until the finger is lifted, then three seconds. Help, Watch completion, dialog close, and returning to the app resume pending checks.
+- Recognition uses a local Web Worker so matching does not block drawing controls. Revision guards discard stale results; unavailable workers fall back to local matching. This remains a geometric practice aid, not validated child OCR.
+- Undo has been removed. New page clears the drawing intentionally; re-tapping the selected mode preserves it.
+- The welcome screen asks for an optional name, saved locally and used for greetings/praise. Blank names get neutral encouragement. Names do not create separate progress profiles.
+- Child play suppresses multi-touch page gestures, selection, drag, and callouts; the decorative logo no longer navigates. Name entry and settings retain normal editing/scrolling. Websites cannot disable OS app switching or browser chrome. Use device-level Guided Access/app pinning for supervised single-app sessions.
+- Physical iPad/Safari speech, actual touch, and diverse child handwriting still require validation. No ink or names are uploaded to a backend.

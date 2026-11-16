@@ -1,11 +1,12 @@
 // Local geometric comparison, not OCR: compare actual ink with the requested
 // letter after translation and uniform scaling. Allow modest tilt, never mirror letters.
 // Raw strokes live only until this page is reset; only summary scores are saved.
+let pencilEpoch=0,pencilChecking=false;
 let pencilPauseTimer=null,pencilRevision=0,pencilCheckedRevision=-1,lastPencilCue=0;
 let pencilDecision=null,pencilLocked=false,pencilGestures=[],pencilGestureStart=0;
 let pencilStrokes=[],pencilLive=null,pencilMatch=null,pencilBest=0;
-function resetPencilShape(){pencilTip=0;pencilShownTip=0;pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
-function beginPencilShape(p){pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
+function resetPencilShape(){pausePencilRecognition();pencilTip=0;pencilShownTip=0;pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
+function beginPencilShape(p){pausePencilRecognition();pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
 function recordPencilShape(p){
  if(!pencilLive)return;
  const previous=pencilLive.at(-1),d=distance(previous,p);
@@ -65,27 +66,34 @@ function matchPencilShape(drawn,template,level='gentle'){
 function finishPencilShape(type){
  if(pencilLive?.length){pencilStrokes.push(pencilLive);pencilRevision++;}
  pencilLive=null;
- if(type==='pointercancel'||type==='lostpointercapture'){cancelPencilPause();return;}
+ if(type==='pointercancel'||type==='lostpointercapture'){cancelPencilPause();updatePencilFeedback();return;}
  if(pencilStrokes.length>pencilGestureStart)pencilGestures.push(pencilGestureStart);
  if(!finished)schedulePencilPause();updatePencilFeedback();
 }
 function assessPencilShape(showHint=false){
- if(guideMode!=='pencil'||finished||demoRunning||retryPending)return;
+ if(guideMode!=='pencil'||finished||demoRunning||retryPending||drawing)return;
  const ink=pencilLive?.length>1?[...pencilStrokes,pencilLive]:pencilStrokes;
- pencilDecision=classifyPencil(ink,current,letterCase,saved.difficulty);
- pencilMatch=pencilDecision.match;
- if(attempt){attempt.shapeMatch=Math.round(pencilMatch.score*100);attempt.shapeCoverage=Math.round(pencilMatch.coverage*100);attempt.shapePrecision=Math.round(pencilMatch.precision*100);attempt.version=4;attempt.recognition=pencilDecision.state;attempt.recognized=pencilDecision.recognized;}
- updatePencilFeedback();
- if(pencilDecision.state==='correct'&&!finished){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}else if(showHint){updatePencilFeedback();showPencilCue();}
+ const epoch=++pencilEpoch,revision=pencilRevision,letter=current,kind=letterCase,level=saved.difficulty;
+ pencilChecking=true;updatePencilFeedback();
+ $('coach-face').textContent='🔎';$('coach-message').textContent='Looking at your letter…';$('coach-bubble').hidden=false;
+ recognizePencilInk(ink,letter,kind,level,decision=>{
+  if(epoch!==pencilEpoch||revision!==pencilRevision||letter!==current||kind!==letterCase||guideMode!=='pencil'||finished||drawing)return;
+  pencilChecking=false;pencilDecision=decision;pencilMatch=decision.match;
+  if(attempt){attempt.shapeMatch=Math.round(pencilMatch.score*100);attempt.shapeCoverage=Math.round(pencilMatch.coverage*100);attempt.shapePrecision=Math.round(pencilMatch.precision*100);attempt.version=4;attempt.recognition=decision.state;attempt.recognized=decision.recognized;}
+  updatePencilFeedback();
+  if(decision.state==='correct'){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}
+  else if(showHint)showPencilCue();else clearPencilCue();
+ });
 }
+
 function updatePencilFeedback(){
- $('undo-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear the next drawing tip':'Help: show the part to try');
+ $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear the next drawing tip':'Help: show the part to try');
  drawPencilDirections();
  if(guideMode!=='pencil')return;
  $('steps').replaceChildren();
- const status=document.createElement('span');status.textContent=finished?'★':pencilLocked?'↶':'✏️';$('steps').append(status);
- $('steps').setAttribute('aria-label',finished?'Letter complete':pencilLocked?'Undo or start a new page':'Draw, then pause to check');
- $('undo-pencil').hidden=guideMode!=='pencil';$('undo-pencil').disabled=finished||(!pencilStrokes.length&&!pencilLive?.length);
+ const status=document.createElement('span');status.textContent=finished?'★':'✏️';$('steps').append(status);
+ $('steps').setAttribute('aria-label',finished?'Letter complete':pencilLocked?'Start a new page':'Draw, then pause to check');
+ $('check-pencil').hidden=guideMode!=='pencil';$('check-pencil').disabled=finished||pencilChecking||(!pencilStrokes.length&&!pencilLive?.length);
 
  $('instruction').textContent='Draw the whole letter anywhere on the paper.';
  $('hint').textContent='Your own lines, your own way. Pause to check.';
@@ -97,15 +105,15 @@ function updatePencilFeedback(){
 function cancelPencilPause(){clearTimeout(pencilPauseTimer);pencilPauseTimer=null;}
 function schedulePencilPause(){
  cancelPencilPause();
- if(!pencilRevision||pencilCheckedRevision===pencilRevision||finished||demoRunning||retryPending)return;
+ if(guideMode!=='pencil'||drawing||document.hidden||document.querySelector?.('dialog[open]')||!pencilRevision||pencilCheckedRevision===pencilRevision||finished||demoRunning||retryPending)return;
  const revision=pencilRevision;
  pencilPauseTimer=setTimeout(()=>{
   pencilPauseTimer=null;
-  if(revision!==pencilRevision||finished||demoRunning||retryPending)return;
+  if(revision!==pencilRevision||drawing||document.hidden||finished||demoRunning||retryPending)return;
   pencilCheckedRevision=revision;assessPencilShape(true);
  },3000);
 }
-function clearPencilCue(){$('pencil-cue').replaceChildren();$('coach-bubble').hidden=true;}
+function clearPencilCue(){$('demo').classList.toggle('help-needed',false);$('pencil-cue').replaceChildren();$('coach-bubble').hidden=true;}
 
 function showPencilCue(){
  const decision=pencilDecision;
@@ -114,23 +122,9 @@ function showPencilCue(){
  $('coach-face').textContent=decision?.state==='different'?(letterCase==='lower'?decision.recognized.toLowerCase():decision.recognized):'🐻';
  let text=decision?.state==='different'?'Let’s make '+(letterCase==='lower'?current.toLowerCase():current):decision?.state==='incomplete'?'Keep drawing when you’re ready':'Watch with me';
  $('coach-message').textContent=text;
- $('help').classList.toggle('help-needed',decision?.state==='uncertain');
+ $('demo').classList.toggle('help-needed',decision?.state==='uncertain');
  if(Date.now()-lastPencilCue>20000){
   lastPencilCue=Date.now();
-  say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?'Keep drawing when you’re ready, Noah.':'Watch with me.');
+  say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?personal('Keep drawing when you’re ready.'):'Watch with me.');
  }
-}
-function undoPencil(){
- if(guideMode!=='pencil'||finished)return;
- cancelPencilPause();cancelVoices();pauseObservation();
- if(pencilLive){pencilLive=null;pencilStrokes.length=pencilGestureStart;}
- else if(pencilGestures.length)pencilStrokes.length=pencilGestures.pop();
- else pencilStrokes.pop();
- activePointer=null;drawing=false;lastPoint=null;pencilPath=null;pencilTry=null;pencilLocked=false;
- pencilMisses=0;pencilDistance=shapeLength(pencilStrokes);pencilRevision++;pencilDecision=null;pencilMatch=null;clearPencilCue();
- // Repaint the actual remaining ink; no synthetic completion paths.
- for(const el of Array.from($('letter-paths').children))if(el.getAttribute('class')==='pencil-ink')el.remove();
- for(const points of pencilStrokes){pencilPath=null;for(const p of points)pencilPoint(p);}pencilPath=null;
- document.body.classList.toggle('is-tracing',false);$('touch-feedback').setAttribute('visibility','hidden');
- updatePencilFeedback();if(pencilStrokes.length)schedulePencilPause();
 }
