@@ -5,12 +5,20 @@ function pencilDirectionInfo(index=pencilTip){
  const length=path.getTotalLength(),start=path.getPointAtLength(0),end=path.getPointAtLength(length);
  return {start,end,length,loop:length>40&&distance(start,end)<24,around:path.getPointAtLength(length/2)};
 }
+// Use the same board heights as the visible handwriting lines.
+function pencilLinePosition(point){
+ const lines=[['sky',80],['plane',180],['grass',360],['worm',425]];
+ const [name,y]=lines.reduce((best,line)=>Math.abs(point.y-line[1])<Math.abs(point.y-best[1])?line:best);
+ const gap=Math.abs(point.y-y);
+ return gap<=8?'on the '+name+' line':gap<=30?'near the '+name+' line':(point.y<y?'above the ':'below the ')+name+' line';
+}
 function pencilDirectionText(index=pencilTip){
  const info=pencilDirectionInfo(index);if(!info)return '';
- const cue=WATCH_SCRIPTS[current][letterCase][index];
- if(info.length<8)return 'Tap a dot at 1.';
- if(info.loop)return 'Start at 1. Go around 2 and back to 1.';
- return `Start at 1. ${cue} Finish at 2.`;
+ let cue=WATCH_SCRIPTS[current][letterCase][index];
+ if(letterCase==='lower'&&['H','M','N'].includes(current)&&index>0)cue='Curve up near the plane line, then down.';
+ if(info.length<8)return `Tap a dot at 1, ${pencilLinePosition(info.start)}.`;
+ if(info.loop)return `Start at 1, ${pencilLinePosition(info.start)}. Go around 2 and back to 1.`;
+ return `Start at 1, ${pencilLinePosition(info.start)}. ${cue} Finish at 2, ${pencilLinePosition(info.end)}.`;
 }
 function demoInstruction(index){return guideMode==='pencil'&&saved.pencilDirections!==false?pencilDirectionText(index):WATCH_SCRIPTS[current][letterCase][index];}
 function drawPencilDirections(index=pencilShownTip){
