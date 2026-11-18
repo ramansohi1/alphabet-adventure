@@ -70,34 +70,35 @@ function finishPencilShape(type){
  if(pencilStrokes.length>pencilGestureStart)pencilGestures.push(pencilGestureStart);
  if(!finished)schedulePencilPause();updatePencilFeedback();
 }
-function assessPencilShape(showHint=false){
+function assessPencilShape(showHint=false,explicit=true){
  if(guideMode!=='pencil'||finished||demoRunning||retryPending||drawing)return;
  const ink=pencilLive?.length>1?[...pencilStrokes,pencilLive]:pencilStrokes;
  const epoch=++pencilEpoch,revision=pencilRevision,letter=current,kind=letterCase,level=saved.difficulty;
  pencilCheckedRevision=revision;pencilChecking=true;updatePencilFeedback();
- $('coach-face').textContent='🔎';$('coach-message').textContent='Looking at your letter…';$('coach-bubble').hidden=false;
+ if(explicit)showPencilMessage('Looking at your letter…');
  recognizePencilInk(ink,letter,kind,level,decision=>{
   if(epoch!==pencilEpoch||revision!==pencilRevision||letter!==current||kind!==letterCase||guideMode!=='pencil'||finished||drawing)return;
   pencilChecking=false;pencilDecision=decision;pencilMatch=decision.match;
   if(attempt){attempt.shapeMatch=Math.round(pencilMatch.score*100);attempt.shapeCoverage=Math.round(pencilMatch.coverage*100);attempt.shapePrecision=Math.round(pencilMatch.precision*100);attempt.version=4;attempt.recognition=decision.state;attempt.recognized=decision.recognized;}
   updatePencilFeedback();
   if(decision.state==='correct'){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}
-  else if(showHint)showPencilCue();else clearPencilCue();
+  else if(showHint&&explicit)showPencilCue();else {clearPencilCue();showPencilMessage('Take your time. Tap Check when done.');}
  });
 }
 
 function updatePencilFeedback(){
+ $('pencil-coach').hidden=guideMode!=='pencil';
  if(typeof clearPencilRepair==='function'){for(const id of ['undo-pencil','hide-pencil-guide'])$(id).hidden=guideMode!=='pencil';$('undo-pencil').disabled=finished||drawing||!pencilStrokes.length;}
  $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear this drawing step':'Help: show the part to try');
  drawPencilDirections();
  if(guideMode!=='pencil')return;
  $('steps').replaceChildren();
  const status=document.createElement('span');status.textContent=finished?'★':'✏️';$('steps').append(status);
- $('steps').setAttribute('aria-label',finished?'Letter complete':pencilLocked?'Start a new page':'Draw, then pause to check');
+ $('steps').setAttribute('aria-label',finished?'Letter complete':pencilLocked?'Start a new page':'Draw, then tap Check when done');
  $('check-pencil').hidden=guideMode!=='pencil';$('check-pencil').disabled=finished||pencilChecking||(!pencilStrokes.length&&!pencilLive?.length);
 
  $('instruction').textContent='Draw the whole letter anywhere on the paper.';
- $('hint').textContent='Your own lines, your own way. Pause to check.';
+ $('hint').textContent='Take your time. Tap Check when done.';
  $('stroke-label').textContent='Match the letter’s shape';
  $('board').setAttribute('aria-label','Draw '+(letterCase==='upper'?current:current.toLowerCase())+' anywhere on the paper. Stroke order is up to you.');
 }
@@ -111,10 +112,10 @@ function schedulePencilPause(){
  pencilPauseTimer=setTimeout(()=>{
   pencilPauseTimer=null;
   if(revision!==pencilRevision||drawing||document.hidden||finished||demoRunning||retryPending)return;
-  pencilCheckedRevision=revision;assessPencilShape(true);
+  pencilCheckedRevision=revision;assessPencilShape(true,false);
  },3000);
 }
-function clearPencilCue(){$('demo').classList.toggle('help-needed',false);$('pencil-cue').replaceChildren();$('coach-bubble').hidden=true;}
+function clearPencilCue(){$('demo').classList.toggle('help-needed',false);$('pencil-cue').replaceChildren();$('coach-bubble').hidden=true;$('pencil-coach').textContent='';}
 
 function showPencilCue(){
  if(typeof coachPencilRepair==='function'){coachPencilRepair();return;}

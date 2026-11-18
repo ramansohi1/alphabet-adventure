@@ -95,3 +95,9 @@ The parent Pencil panel shows the current or latest attempt, repair focus and he
 Implementation stays in browser JavaScript and the existing Web Worker because input, animation, and local recognition require no server or upload. Reviewed the University of Washington [$P point-cloud recognizer](https://depts.washington.edu/acelab/proj/dollar/pdollar.html) as background for order-independent matching; no third-party code was copied. The existing classifier is retained.
 
 Validation: existing tracing, picture-game, Watch, and coaching suites, plus missing crossbar, translated/scaled repair marks, preserved ink, one-shot automatic playback, stale-timer cancellation, Undo, repair completion, model visibility, and parent guidance. Browser interaction checks supplement synthetic tests; physical child/stylus testing is still needed.
+
+## Recording-driven coaching update (v30)
+
+Thinking pauses still allow recognition of a finished letter, but never launch a lesson. Tap Check to request repair guidance; the existing parent setting controls automatic playback after that request. Each repair topic plays automatically at most once per page, even if the child adds more ink. Watch remains available on demand.
+
+Pencil instructions now occupy a dedicated strip outside the drawing area. Significant missing parts receive a complete blue route with start/end numbers; isolated small gaps are not presented as missing strokes. Ink and recognition thresholds are unchanged. Regression coverage includes pause-versus-Check behavior, replay suppression after retracing, numbered repairs, and existing 52-letter recognition/coaching checks.

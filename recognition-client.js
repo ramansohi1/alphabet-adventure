@@ -6,7 +6,7 @@ function recognizePencilInk(ink,letter,kind,level,done){
  try{
   // Discard an older in-flight result rather than queueing slow checks.
   pencilWorker?.terminate();clearTimeout(pencilWorkerTimer);
-  pencilWorker=new Worker('recognition-worker.js?v=29');
+  pencilWorker=new Worker('recognition-worker.js?v=30');
   pencilWorker.onmessage=({data})=>{if(data.id!==id||id!==pencilRequest)return;if(data.error){fallback();return;}clearTimeout(pencilWorkerTimer);pencilWorker.terminate();pencilWorker=null;done(data.decision);};
   pencilWorker.onerror=fallback;
   pencilWorkerTimer=setTimeout(fallback,10000);

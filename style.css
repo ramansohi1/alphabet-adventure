@@ -128,3 +128,8 @@ dialog{touch-action:pan-y}input,textarea{touch-action:manipulation;-webkit-user-
 #pencil-parent-plan{background:#f0f8f5;border:1px solid #b8d7cb;margin:14px 0}#pencil-parent-plan li{margin:10px 0;line-height:1.5}#pencil-parent-plan h4{margin:12px 0 4px}#pencil-repair{pointer-events:none}
 
 .pencil-guide.pencil-model-hidden #letter-paths .track,.pencil-guide.pencil-model-hidden #letter-paths .centerline,.pencil-guide.pencil-model-hidden #pencil-directions,.pencil-guide.pencil-model-hidden #pencil-repair{visibility:hidden}
+
+/* Pencil coaching lives outside the paper, including on narrow phones. */
+.pencil-coach{min-height:2.7em;padding:5px 12px;font-size:13px;line-height:1.35;color:#583768;background:#fff8dc;border-radius:10px;flex-shrink:0}
+.pencil-coach[hidden]{display:none}
+.pencil-repair-key{font-size:12px;padding:3px 12px}

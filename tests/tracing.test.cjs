@@ -139,7 +139,7 @@ assert.equal(run('pencilPauseTimer'),null,'Held finger is not assessed mid-strok
 assert.equal(run('pencilPauseTimer'),null,'No duplicate check after completion');
 run("current='E';letterCase='upper';render();");
 traceStroke(run('samples[0]'));const beforeInk=run('pencilStrokes.length');firePencilPause();
-assert.equal(run('finished'),false);assert.equal(get('coach-bubble').hidden,false);assert.equal(get('pencil-cue').children.length,0,'Pencil never forces glowing preset points');assert.equal(run('pencilStrokes.length'),beforeInk,'Help preserves ink');
+assert.equal(run('finished'),false);assert.equal(get('coach-bubble').hidden,true);assert.match(get('pencil-coach').textContent,/Tap Check/);assert.equal(run('pencilAutoTimer'),null,'Thinking pauses never start demonstrations');assert.equal(get('pencil-cue').children.length,0,'Pencil never forces glowing preset points');assert.equal(run('pencilStrokes.length'),beforeInk,'Help preserves ink');
 run('schedulePencilPause()');assert.equal(run('pencilPauseTimer'),null,'Unchanged ink does not repeatedly trigger prompts');
 run('render()');event('pointerdown',{x:250,y:250});event('pointerup',{x:250,y:250});assert.ok(run('pencilPauseTimer'),'Taps are real pencil ink');
 traceStroke(run('samples[0]'));run('showDemo()');assert.equal(run('pencilPauseTimer'),null,'Watch cancels idle assessment');run('stopDemo();render()');
@@ -294,3 +294,13 @@ get('chart-mode').value='trail';run('drawDashboard()');assert.equal(get('pencil-
 console.log('PASS: localized missing-part marks, shifted/scaled alignment, automatic partial demo, preserved ink, no replay loop, repair completion, Undo, cancellation and parent guidance.');
 
 run("setGuide('pencil');render();");get('hide-pencil-guide').onclick();assert.equal(run('pencilModelHidden'),true);assert.equal(get('watch-guide').attrs.visibility,'hidden');run('render()');assert.equal(run('pencilModelHidden'),false);
+
+// Recording regression: changed ink must not restart the same automatic lesson.
+run("current='H';letterCase='upper';saved.autoPencil=true;render();");
+traceStroke(run('samples[0]'));traceStroke(run('samples[1]'));get('check-pencil').onclick();
+const once=scheduled.get(run('pencilAutoTimer'));once.fn();get('stop-pencil-watch').onclick();
+traceStroke(run('samples[1]'));get('check-pencil').onclick();assert.equal(run('pencilAutoTimer'),null,'Retracing does not loop the same lesson');
+assert.equal(get('coach-bubble').hidden,true,'Pencil feedback never obscures the paper');
+assert.ok(run('pencilRepair.missing[0].length > 20'),'Full repair route replaces tiny isolated marks');
+assert.equal(get('pencil-repair').children.filter(x=>x.tag==='text').length,2,'Blue repair has start and finish numbers');
+console.log('PASS: video regressions: quiet thinking pauses, off-paper feedback, numbered full-part repairs, and no repeat lesson after retracing.');

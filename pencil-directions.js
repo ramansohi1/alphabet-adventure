@@ -72,7 +72,8 @@ function advancePencilCoaching(speak=true){
  if(speak&&pencilTip!==previous)showPencilTip();
 }
 function showPencilTip(){
- const text=pencilTip<paths.length?pencilDirectionText(pencilTip):'Now pause. Let’s look at your letter.';
- $('coach-face').textContent='☝️';$('coach-message').textContent=text;$('coach-bubble').hidden=false;
+ const text=pencilTip<paths.length?pencilDirectionText(pencilTip):'Tap Check when you’re done.';
+ if(typeof showPencilMessage==='function')showPencilMessage(text);else {$('coach-face').textContent='☝️';$('coach-message').textContent=text;$('coach-bubble').hidden=false;}
  say(text);
 }
+
