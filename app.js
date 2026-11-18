@@ -6,7 +6,7 @@ let saved = { completed:[], sound:true, animations:!matchMedia('(prefers-reduced
 let storageOK = true;
 try { const previous=JSON.parse(localStorage.getItem(KEY)); if(previous && typeof previous==='object') {
  saved.completed=Array.isArray(previous.completed)?previous.completed.filter(x=>/^(upper|lower):[A-Z]$/.test(x)):[];
- for(const k of ['sound','animations','music','adaptive','pencilDirections']) if(typeof previous[k]==='boolean') saved[k]=previous[k];
+ for(const k of ['sound','animations','music','adaptive','pencilDirections','autoPencil']) if(typeof previous[k]==='boolean') saved[k]=previous[k];
  if(['left','right'].includes(previous.hand))saved.hand=previous.hand;
  if(typeof previous.lines==='boolean')saved.lines=previous.lines;
  if(['en-US','en-GB'].includes(previous.accent))saved.accent=previous.accent;
@@ -91,7 +91,7 @@ board.addEventListener('pointerdown',e=>{if(!started||finished||demoRunning||ret
 board.addEventListener('pointermove',e=>{if(e.pointerId!==activePointer||!drawing||finished||demoRunning)return;e.preventDefault();const p=coords(e);if(!p)return;const previous=lastPoint;touchFeedback(p);if(pencilTravel(p))return;if(guideMode==='pencil'){for(const sample of e.getCoalescedEvents?.()||[]){const q=coords(sample);if(q){recordPencilShape(q);pencilPoint(q);}}recordPencilShape(p);pencilPoint(p);if(previous&&distance(p,previous)>.01)observeTouch(p);lastPoint=p;return;}if(previous&&distance(p,previous)>.01)observeTouch(p);if(guideMode==='pencil')pencilPoint(p);lastPoint=p;if(previous&&distance(previous,p)>100){observeError('jumps');pauseObservation();if(guideMode!=='pencil')drawing=false;giveHint('Lift your finger and continue at the glowing dot.');return;}if(previous){const n=Math.max(1,Math.ceil(distance(previous,p)/5));for(let i=1;i<=n&&drawing;i++){const q={x:previous.x+(p.x-previous.x)*i/n,y:previous.y+(p.y-previous.y)*i/n};const from={x:previous.x+(p.x-previous.x)*(i-1)/n,y:previous.y+(p.y-previous.y)*(i-1)/n};advance(q,from);}}});
 function release(e){if(e.pointerId!==activePointer)return;if(guideMode==='pencil'&&e.type==='pointerup'&&pencilLive&&drawing){const p=coords(e);if(p&&lastPoint&&distance(p,lastPoint)<=100){recordPencilShape(p);pencilPoint(p);}}$('touch-feedback').setAttribute('visibility','hidden');if(guideMode==='pencil')finishPencilShape(e.type);finishPencilTry(e.type);pauseObservation();pencilPath=null;activePointer=null;drawing=false;lastPoint=null;document.body.classList.toggle('is-tracing',false);if(!finished&&!demoRunning){if(guideMode==='pencil'){if(e.type==='pointerup')advancePencilCoaching();updatePencilFeedback();schedulePencilPause();return;}markStart();$('instruction').textContent=progress?'Keep going from the glowing dot':`Start at the glowing dot · stroke ${stroke+1}`;}}
 board.addEventListener('pointerup',release);board.addEventListener('pointercancel',release);board.addEventListener('lostpointercapture',release);
-function stopDemo(){clearTimeout(demoSpeechTimer);cancelVoices();$('watch-caption').hidden=true;$('start-marker').setAttribute('visibility','visible');demoToken++;cancelAnimationFrame(demoFrame);demoRunning=false;$('demo-dot').setAttribute('visibility','hidden');$('demo').disabled=false;}
+function stopDemo(){if(typeof cancelPencilAuto==='function'){cancelPencilAuto();$('stop-pencil-watch').hidden=true;}clearTimeout(demoSpeechTimer);cancelVoices();$('watch-caption').hidden=true;$('start-marker').setAttribute('visibility','visible');demoToken++;cancelAnimationFrame(demoFrame);demoRunning=false;$('demo-dot').setAttribute('visibility','hidden');$('demo').disabled=false;}
 $('letters-prev').onclick=()=>updateAlphabet(Math.max(0,alphabetPage-1));$('letters-next').onclick=()=>updateAlphabet(Math.min(4,alphabetPage+1));
 $('demo').onclick=()=>{unlockAudio();showDemo();};$('retry').onclick=()=>{unlockAudio();render();say(guideMode==='pencil'?'Let’s draw '+spokenLetter(current)+'.':'Let’s try again. Start at the glowing dot.');};$('again').onclick=()=>{render();describe();};$('next').onclick=nextAdventureLetter;$('reward-animal').onclick=()=>{unlockAudio();nextAdventureLetter();};
 for(const c of ['upper','lower'])$(c).onclick=()=>{adventure=null;refreshAdventure();letterCase=c;render();describe();};
@@ -137,3 +137,6 @@ document.addEventListener('pointerdown',e=>{if(childPlayTarget(e.target)&&(e.isP
 document.addEventListener('click',e=>{if(childPlayTarget(e.target)&&Date.now()<multiTouchUntil){e.preventDefault();e.stopImmediatePropagation();}},{capture:true});
 
 for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('close',()=>schedulePencilPause());
+
+
+initPencilFeedback();

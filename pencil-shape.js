@@ -5,8 +5,8 @@ let pencilEpoch=0,pencilChecking=false;
 let pencilPauseTimer=null,pencilRevision=0,pencilCheckedRevision=-1,lastPencilCue=0;
 let pencilDecision=null,pencilLocked=false,pencilGestures=[],pencilGestureStart=0;
 let pencilStrokes=[],pencilLive=null,pencilMatch=null,pencilBest=0;
-function resetPencilShape(){pausePencilRecognition();pencilTip=0;pencilShownTip=0;pencilGuideDone=[];pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
-function beginPencilShape(p){pausePencilRecognition();pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
+function resetPencilShape(){if(typeof resetPencilRepair==='function')resetPencilRepair();pausePencilRecognition();pencilTip=0;pencilShownTip=0;pencilGuideDone=[];pencilDecision=null;pencilLocked=false;pencilGestures=[];cancelPencilPause();pencilRevision=0;pencilCheckedRevision=-1;clearPencilCue();pencilStrokes=[];pencilLive=null;pencilMatch=null;pencilBest=0;}
+function beginPencilShape(p){if(typeof clearPencilRepair==='function')clearPencilRepair();pausePencilRecognition();pencilGestureStart=pencilStrokes.length;cancelPencilPause();clearPencilCue();pencilLive=[{...p}];}
 function recordPencilShape(p){
  if(!pencilLive)return;
  const previous=pencilLive.at(-1),d=distance(previous,p);
@@ -74,7 +74,7 @@ function assessPencilShape(showHint=false){
  if(guideMode!=='pencil'||finished||demoRunning||retryPending||drawing)return;
  const ink=pencilLive?.length>1?[...pencilStrokes,pencilLive]:pencilStrokes;
  const epoch=++pencilEpoch,revision=pencilRevision,letter=current,kind=letterCase,level=saved.difficulty;
- pencilChecking=true;updatePencilFeedback();
+ pencilCheckedRevision=revision;pencilChecking=true;updatePencilFeedback();
  $('coach-face').textContent='🔎';$('coach-message').textContent='Looking at your letter…';$('coach-bubble').hidden=false;
  recognizePencilInk(ink,letter,kind,level,decision=>{
   if(epoch!==pencilEpoch||revision!==pencilRevision||letter!==current||kind!==letterCase||guideMode!=='pencil'||finished||drawing)return;
@@ -87,6 +87,7 @@ function assessPencilShape(showHint=false){
 }
 
 function updatePencilFeedback(){
+ if(typeof clearPencilRepair==='function'){for(const id of ['undo-pencil','hide-pencil-guide'])$(id).hidden=guideMode!=='pencil';$('undo-pencil').disabled=finished||drawing||!pencilStrokes.length;}
  $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear this drawing step':'Help: show the part to try');
  drawPencilDirections();
  if(guideMode!=='pencil')return;
@@ -116,6 +117,7 @@ function schedulePencilPause(){
 function clearPencilCue(){$('demo').classList.toggle('help-needed',false);$('pencil-cue').replaceChildren();$('coach-bubble').hidden=true;}
 
 function showPencilCue(){
+ if(typeof coachPencilRepair==='function'){coachPencilRepair();return;}
  const decision=pencilDecision;
  $('pencil-cue').replaceChildren();
  $('coach-bubble').hidden=false;
@@ -128,3 +130,4 @@ function showPencilCue(){
   say(decision?.state==='different'? 'Let’s make '+spokenLetter(current)+'. Watch with me.':decision?.state==='incomplete'?personal('Keep drawing when you’re ready.'):'Watch with me.');
  }
 }
+

@@ -62,5 +62,6 @@ function classifyPencil(strokes,wanted,kind,level='gentle'){
   if(canContinue)state='incomplete';
   else {state='different';recognized=best.letter;}
  }else if(match.precision>=.85&&match.coverage<.9)state='incomplete';
- return {state,recognized,ranked:ranked.slice(0,3).map(r=>({letter:r.letter,score:Math.round(r.score*100)})),match};
+ return {state,recognized,template:target.template,ranked:ranked.slice(0,3).map(r=>({letter:r.letter,score:Math.round(r.score*100)})),match};
 }
+

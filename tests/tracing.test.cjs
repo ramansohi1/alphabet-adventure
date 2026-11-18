@@ -3,7 +3,7 @@
 const fs=require('node:fs');const vm=require('node:vm');const assert=require('node:assert/strict');const path=require('node:path');
 function geometry(d){const t=d.match(/[MLC]|-?\d+(?:\.\d+)?/g)||[];let i=0,p={x:0,y:0},points=[];const next=()=>({x:+t[i++],y:+t[i++]});while(i<t.length){const op=t[i++];if(op==='M'){p=next();points.push(p);}else if(op==='L'){p=next();points.push(p);}else if(op==='C'){const from=p,a=next(),b=next(),end=next();for(let n=1;n<=150;n++){const u=n/150,v=1-u;points.push({x:v*v*v*from.x+3*v*v*u*a.x+3*v*u*u*b.x+u*u*u*end.x,y:v*v*v*from.y+3*v*v*u*a.y+3*v*u*u*b.y+u*u*u*end.y});}p=end;}else throw Error('Unexpected SVG '+op);}let sum=0;const segments=[];for(let n=1;n<points.length;n++){const a=points[n-1],b=points[n],length=Math.hypot(a.x-b.x,a.y-b.y);segments.push({a,b,start:sum,length});sum+=length;}return {length:sum,at(value){value=Math.max(0,Math.min(sum,value));const s=segments.find(s=>value<=s.start+s.length)||segments.at(-1);if(!s)return points[0];const u=s.length?(value-s.start)/s.length:0;return{x:s.a.x+(s.b.x-s.a.x)*u,y:s.a.y+(s.b.y-s.a.y)*u};}};}
 class Element{constructor(tag='div'){this.tag=tag;this.attrs={};this.style={setProperty(){}};this.children=[];this.listeners={};this.classList={toggle(){}};this.dataset={};this.hidden=false;}setAttribute(k,v){this.attrs[k]=String(v);if(k==='d')this.geo=geometry(v);}getAttribute(k){return this.attrs[k];}append(...e){this.children.push(...e);}replaceChildren(...e){this.children=e;}addEventListener(k,fn){this.listeners[k]=fn;}getTotalLength(){return this.geo.length;}getPointAtLength(x){return this.geo.at(x);}getScreenCTM(){return{inverse(){return {};}};}setPointerCapture(){}showModal(){this.open=true;}close(){this.open=false;}focus(){}remove(){} }
-const els=new Map();const get=id=>{if(!els.has(id))els.set(id,new Element());return els.get(id);};const storage=new Map();const context={console,Math,document:{getElementById:get,createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),querySelectorAll:()=>[],body:new Element(),addEventListener(){}},window:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:true}),setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},DOMPoint:class{constructor(x,y){this.x=x;this.y=y;}matrixTransform(){return this;}},confirm:()=>false};vm.createContext(context);const root=fs.existsSync(path.resolve(__dirname,'../dist'))?path.resolve(__dirname,'../dist'):path.resolve(__dirname,'..');for(const f of ['letters.js','scene.js','learning.js','accessibility.js','play.js','pencil-shape.js','progress.js','studio.js','narration.js','rewards.js','recognition-data.js','recognition.js','examples.js','pencil-directions.js','recognition-client.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),context);
+const els=new Map();const get=id=>{if(!els.has(id))els.set(id,new Element());return els.get(id);};const storage=new Map();const context={console,Math,document:{getElementById:get,createElement:t=>new Element(t),createElementNS:(_,t)=>new Element(t),querySelectorAll:()=>[],body:new Element(),addEventListener(){}},window:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>({matches:true}),setInterval:()=>1,clearInterval(){},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},DOMPoint:class{constructor(x,y){this.x=x;this.y=y;}matrixTransform(){return this;}},confirm:()=>false};vm.createContext(context);const root=fs.existsSync(path.resolve(__dirname,'../dist'))?path.resolve(__dirname,'../dist'):path.resolve(__dirname,'..');for(const f of ['letters.js','scene.js','learning.js','accessibility.js','play.js','pencil-shape.js','progress.js','studio.js','narration.js','rewards.js','recognition-data.js','recognition.js','examples.js','pencil-directions.js','recognition-client.js','pencil-feedback.js','app.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),context);
 // Run pure geometry in the host realm to avoid VM global-lookup overhead in
 // millions of distance comparisons. Event handlers still execute in the DOM harness.
 const geometryKernel=Function('distance',['pencil-shape.js','recognition-data.js','recognition.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')+';return {matchPencilShape,classifyPencil};')((a,b)=>Math.hypot(a.x-b.x,a.y-b.y));
@@ -240,14 +240,14 @@ get('player-name').value='  Amara  ';get('start').onclick();assert.equal(run('pl
 assert.equal(storage.get('alphabet-player-name'),'Amara');assert.equal(run("personal('Good job!')"),'Good job, Amara!');
 get('player-name').value='';get('start').onclick();assert.equal(run("personal('Good job!')"),'Good job!');
 assert.equal(run("cleanPlayerName('  ਗੁਰਲੀਨ  ਕੌਰ  ')"),'ਗੁਰਲੀਨ ਕੌਰ');assert.equal(run("cleanPlayerName('<Ada>')"),'Ada');
-assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id="undo-pencil"'));
+assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id="undo-pencil"'));
 // Async recognition must never reward a newly selected page or overwrite new ink.
 const pending=[];context.recognizePencilInk=(ink,letter,kind,level,done)=>pending.push(()=>done(geometryKernel.classifyPencil(ink,letter,kind,level)));
 run("current='L';render();");traceStroke(run('samples[0]'));get('check-pencil').onclick();assert.equal(run('pencilChecking'),true);
 run("current='A';render();");pending.shift()();assert.equal(run('finished'),false);assert.equal(run('current'),'A');
 run("current='L';render();");traceStroke(run('samples[0]'));get('check-pencil').onclick();run('pauseForDialog()');pending.shift()();assert.equal(run('finished'),false);
 run('schedulePencilPause()');assert.ok(run('pencilPauseTimer'),'Interrupted async check can resume');
-console.log('PASS: Help resume, explicit Check, mode preservation, no checkpoints, custom/blank/Unicode names, no Undo, stale async result rejection.');
+console.log('PASS: Help resume, explicit Check, mode preservation, no checkpoints, custom/blank/Unicode names, additive Undo, stale async result rejection.');
 
 // Pencil releases automatically advance coaching while Trace checkpoints stay separate.
 run("current='H';letterCase='lower';saved.sound=false;saved.pencilDirections=true;setGuide('pencil');render();");
@@ -260,3 +260,37 @@ traceStroke(run('samples[1]'));assert.equal(run('pencilTip'),2);
 assert.equal(run('finished'),false,'Guide completion still waits for recognition');
 run('render()');assert.equal(run('pencilTip'),0);assert.equal(run('pencilGuideDone.length'),0);
 console.log('PASS: Pencil release advances h guidance, Help repeats, and reset clears coaching progress.');
+
+// Additive repair UI: missing parts, alignment, automatic Watch and parent actions.
+context.recognizePencilInk=(ink,letter,kind,level,done)=>done(geometryKernel.classifyPencil(ink,letter,kind,level));
+run("saved.sound=false;saved.autoPencil=true;current='H';letterCase='upper';setGuide('pencil');render();");
+traceStroke(run('samples[0]'));traceStroke(run('samples[1]'));
+get('check-pencil').onclick();
+assert.equal(run('pencilRepair.focus'),'missing','Missing H crossbar gets a focused repair');
+assert.equal(run('pencilRepair.part'),2);
+assert.ok(get('pencil-repair').children.length);
+assert.equal(get('pencil-repair-key').hidden,false);
+const keptH=run('JSON.stringify(pencilStrokes)');
+let timer=run('pencilAutoTimer');assert.ok(scheduled.has(timer),'Auto demonstration scheduled');scheduled.get(timer).fn();scheduled.delete(timer);
+assert.equal(run('demoRunning'),true,'Missing part starts without Watch click');
+assert.equal(get('stop-pencil-watch').hidden,false);assert.match(get('watch-caption').textContent,/Join them across/);
+assert.equal(run('JSON.stringify(pencilStrokes)'),keptH);
+get('stop-pencil-watch').onclick();assert.equal(run('demoRunning'),false);assert.equal(run('finished'),false);
+get('check-pencil').onclick();assert.equal(run('pencilAutoTimer'),null,'Same ink does not loop a demonstration');
+traceStroke(run('samples[2]'));get('check-pencil').onclick();assert.equal(run('finished'),true,'Adding missing part passes through existing recognition');
+assert.equal(run('observations.at(-1).coaching.focus'),'missing');assert.equal(run('observations.at(-1).coaching.autoDemos'),1);
+// A scaled, translated H keeps blue marks on that letter, not the preset model.
+run("current='H';render();");for(const s of run('samples.slice(0,2)'))traceStroke(s.map(p=>({x:p.x*.6+90,y:p.y*.6+65})));
+get('check-pencil').onclick();assert.equal(run('pencilRepair.focus'),'missing');
+assert.ok(run('pencilRepair.missing.flat().every(p=>p.x>=210&&p.x<=330&&Math.abs(p.y-197)<1)'));
+// A new touch cancels pending automatic playback.
+const staleAuto=scheduled.get(run('pencilAutoTimer')).fn;event('pointerdown',{x:250,y:200});staleAuto();assert.equal(run('demoRunning'),false);event('pointerup',{x:250,y:200});
+run('render();');traceStroke(run('samples[0]'));traceStroke(run('samples[1]'));const firstH=run('JSON.stringify(pencilStrokes[0])');get('undo-pencil').onclick();assert.equal(run('pencilStrokes.length'),1);assert.equal(run('JSON.stringify(pencilStrokes[0])'),firstH);assert.equal(run('pencilLocked'),false);
+// Parent setting stops auto playback but leaves the check and hints available.
+run('saved.autoPencil=false;');get('check-pencil').onclick();assert.equal(run('pencilAutoTimer'),null);assert.equal(run('demoRunning'),false);
+run("saved.autoPencil=true;render();");traceStroke(run('samples[0]'));get('check-pencil').onclick();const interrupted=scheduled.get(run('pencilAutoTimer'))?.fn;run('pauseForDialog()');if(interrupted)interrupted();assert.equal(run('demoRunning'),false);
+get('chart-mode').value='pencil';get('chart-level').value=run('saved.difficulty');run('drawDashboard()');assert.equal(get('pencil-parent-plan').hidden,false);assert.ok(get('pencil-parent-plan').children.some(x=>x.tag==='ol'));
+get('chart-mode').value='trail';run('drawDashboard()');assert.equal(get('pencil-parent-plan').hidden,true,'Crayon parent chart unaffected');
+console.log('PASS: localized missing-part marks, shifted/scaled alignment, automatic partial demo, preserved ink, no replay loop, repair completion, Undo, cancellation and parent guidance.');
+
+run("setGuide('pencil');render();");get('hide-pencil-guide').onclick();assert.equal(run('pencilModelHidden'),true);assert.equal(get('watch-guide').attrs.visibility,'hidden');run('render()');assert.equal(run('pencilModelHidden'),false);

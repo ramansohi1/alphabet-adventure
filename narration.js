@@ -7,6 +7,7 @@ function narrateDemo(text,token,done){let settled=false;const finish=()=>{if(set
 // Display-only SVG: never inserted into ink arrays or recognition templates.
 let watchGuidePaths=[];
 function clearWatchGuide(){
+ $('watch-guide').setAttribute('visibility','visible');if(typeof setPencilModelHidden==='function')setPencilModelHidden(false);
  watchGuidePaths=[];
  $('watch-guide').replaceChildren();
 }
@@ -24,7 +25,8 @@ function revealWatchGuide(index,fraction){
  guide.setAttribute('visibility','visible');
  guide.setAttribute('stroke-dashoffset',paths[index].getTotalLength()*(1-fraction));
 }
-function showDemo(onlyCurrent=false){pausePencilRecognition();cancelPencilPause();clearPencilCue();if(finished&&guideMode!=='pencil')render();stopDemo();prepareWatchGuide();if(finished)$('celebrate').hidden=true;pauseObservation();document.body.classList.toggle('is-tracing',false);activePointer=null;drawing=false;lastPoint=null;demoRunning=true;$('demo').disabled=true;$('start-marker').setAttribute('visibility','hidden');const token=demoToken,dot=$('demo-dot');const first=onlyCurrent?stroke:0,end=onlyCurrent?stroke+1:paths.length;const scripts=WATCH_SCRIPTS[current][letterCase];
+function showDemo(onlyCurrent=false){pausePencilRecognition();cancelPencilPause();clearPencilCue();if(finished&&guideMode!=='pencil')render();stopDemo();prepareWatchGuide();if(finished)$('celebrate').hidden=true;pauseObservation();document.body.classList.toggle('is-tracing',false);activePointer=null;drawing=false;lastPoint=null;demoRunning=true;if(typeof initPencilFeedback==='function')$('stop-pencil-watch').hidden=guideMode!=='pencil';$('demo').disabled=true;$('start-marker').setAttribute('visibility','hidden');const token=demoToken,dot=$('demo-dot');const first=onlyCurrent?stroke:0,end=onlyCurrent?stroke+1:paths.length;const scripts=WATCH_SCRIPTS[current][letterCase];
  function startStroke(i){if(token!==demoToken)return;if(i>=end){stopDemo();markStart();if(guideMode==='pencil')drawPencilDirections(pencilTip);$('instruction').textContent='Your turn!';say('Your turn!');schedulePencilPause();if(finished)$('celebrate').hidden=false;return;}let speechDone=false,movementDone=false,advanced=false,startTime=null;const path=paths[i],len=path.getTotalLength(),text=demoInstruction(i);const voiced=saved.sound&&!!window.speechSynthesis;const duration=Math.max(len<5?650:1800,len*7,voiced?text.split(/\s+/).length*430:0);const next=()=>{if(token===demoToken&&speechDone&&movementDone&&!advanced){advanced=true;demoSpeechTimer=setTimeout(()=>startStroke(i+1),450);}};if(guideMode==='pencil')drawPencilDirections(i);const p=path.getPointAtLength(0);dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.y);dot.setAttribute('visibility','visible');paths.forEach((p,n)=>p.classList.toggle('active-track',n===i));narrateDemo(text,token,()=>{speechDone=true;next();});
  function frame(t){if(token!==demoToken)return;if(startTime===null)startTime=t;const fraction=Math.min(1,(t-startTime)/duration),p=path.getPointAtLength(len*fraction);revealWatchGuide(i,fraction);dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.y);if(fraction===1){movementDone=true;next();}else demoFrame=requestAnimationFrame(frame);}demoFrame=requestAnimationFrame(frame);}
  narrateDemo(`Watch how to write ${letterCase==='lower'?'little':'capital'} ${spokenLetter(current)}.`,token,()=>startStroke(first));}
+

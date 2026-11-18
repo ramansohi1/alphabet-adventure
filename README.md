@@ -82,3 +82,16 @@ Run `node tests/picture-game.test.cjs` for 887 focused checks across all 52 form
 In Pencil mode, Watch animates a wider translucent purple model beneath the child's dark ink. Completed model strokes stay visible for comparison and continued drawing. Replaying Watch starts a fresh model; New page and letter changes clear it. The model is a separate, non-interactive SVG layer and never enters recognition or earned progress. Watching a completed Pencil page preserves the child's ink and returns to its reward afterward.
 
 `node tests/watch-guide.test.cjs` covers 410 checks for all 52 forms, retained model strokes, cancellation, resets, finished-page preservation and unchanged crayon behavior. The focused checks passed in an isolated JavaScript runtime; physical-device visual and speech checks remain pending.
+
+
+## Pencil repair coaching (v29)
+
+After an idle or explicit Check, blue dashed segments suggest one missing part; amber overlays identify off-model ink regions to compare. Suggestions use the recognized target variant and inverse size/position alignment, so they follow the child's drawing. Low-confidence and different-letter results use a whole-letter demonstration instead of precise error claims. Recognition and reward thresholds remain unchanged.
+
+Automatic demonstrations run once per ink revision and preserve original ink. A missing part receives a short, captioned demonstration at the child's position; other results use existing Watch. New input, navigation, dialogs, and My turn cancel playback or its pending timer. Speech follows the existing sound setting. Undo last removes one gesture and rechecks the remaining drawing. Hide model hides the model and repair guides, not the child's ink; new pages and demonstrations restore guidance.
+
+The parent Pencil panel shows the current or latest attempt, repair focus and help counts, plus a watch/copy/cover/try-on-paper routine. Stored records contain only bounded summaries, never raw drawings. The display is a practice aid, not a validated handwriting assessment or proof of muscle-memory transfer.
+
+Implementation stays in browser JavaScript and the existing Web Worker because input, animation, and local recognition require no server or upload. Reviewed the University of Washington [$P point-cloud recognizer](https://depts.washington.edu/acelab/proj/dollar/pdollar.html) as background for order-independent matching; no third-party code was copied. The existing classifier is retained.
+
+Validation: existing tracing, picture-game, Watch, and coaching suites, plus missing crossbar, translated/scaled repair marks, preserved ink, one-shot automatic playback, stale-timer cancellation, Undo, repair completion, model visibility, and parent guidance. Browser interaction checks supplement synthetic tests; physical child/stylus testing is still needed.

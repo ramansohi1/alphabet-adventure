@@ -120,3 +120,11 @@ dialog{touch-action:pan-y}input,textarea{touch-action:manipulation;-webkit-user-
 .watch-guide-line{fill:none;stroke:#9661d2;stroke-width:11;stroke-opacity:.55;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 #watch-guide{display:none}
 .pencil-guide #watch-guide{display:block}
+
+
+/* Pencil repair controls stay outside the writing surface. */
+.pencil-repair-key{font-size:.85rem;color:#36495b;padding:5px 14px;background:#f1f8fa;border-radius:10px}
+.pencil-repair-tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.pencil-repair-tools:has(button:not([hidden])){padding:5px 10px}.pencil-repair-tools button{font-size:.85rem;min-height:40px;padding:6px 12px}
+#pencil-parent-plan{background:#f0f8f5;border:1px solid #b8d7cb;margin:14px 0}#pencil-parent-plan li{margin:10px 0;line-height:1.5}#pencil-parent-plan h4{margin:12px 0 4px}#pencil-repair{pointer-events:none}
+
+.pencil-guide.pencil-model-hidden #letter-paths .track,.pencil-guide.pencil-model-hidden #letter-paths .centerline,.pencil-guide.pencil-model-hidden #pencil-directions,.pencil-guide.pencil-model-hidden #pencil-repair{visibility:hidden}
