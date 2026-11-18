@@ -51,7 +51,11 @@ function classifyPencil(strokes,wanted,kind,level='gentle'){
  const target=ranked.find(r=>r.letter===wanted);
  const match=matchPencilShape(strokes,target.template,level);
  const bestMatch=matchPencilShape(strokes,best.template,level);
- const certain=best.score>=.86&&gap>=.035&&bestMatch.pass;
+ // A wobbly but complete letter can pass every shape check yet narrowly miss
+ // the ranking score. Allow agreement between strong geometry and a clear winner.
+ // This is prompt-independent, Gentle-only, and still requires every part.
+ const strongGeometry=level==='gentle'&&best.score>=.80&&gap>=.15&&bestMatch.coverage>=.96&&bestMatch.precision>=.96&&bestMatch.parts.every(p=>p>=.94);
+ const certain=bestMatch.pass&&((best.score>=.86&&gap>=.035)||strongGeometry);
  let state='uncertain',recognized=null;
  if(certain&&best.letter===wanted&&match.pass){state='correct';recognized=wanted;}
  else if(certain&&best.letter!==wanted){

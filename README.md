@@ -101,3 +101,7 @@ Validation: existing tracing, picture-game, Watch, and coaching suites, plus mis
 Thinking pauses still allow recognition of a finished letter, but never launch a lesson. Tap Check to request repair guidance; the existing parent setting controls automatic playback after that request. Each repair topic plays automatically at most once per page, even if the child adds more ink. Watch remains available on demand.
 
 Pencil instructions now occupy a dedicated strip outside the drawing area. Significant missing parts receive a complete blue route with start/end numbers; isolated small gaps are not presented as missing strokes. Ink and recognition thresholds are unchanged. Regression coverage includes pause-versus-Check behavior, replay suppression after retracing, numbered repairs, and existing 52-letter recognition/coaching checks.
+
+## Recognition agreement fix (v31)
+
+Gentle mode now accepts agreement between a strong geometric match and an unambiguous ranking winner, even when small wobbles narrowly miss the original ranking cutoff. The alternate rule requires ranking of at least .80, a lead of at least .15, coverage and precision of at least .96, every component at least .94, and all existing shape-pass requirements. It is independent of the requested letter; Focused is unchanged. Tests use artificial sine-wave wobbles on the existing public letter template, with no user handwriting coordinates. They cover competing prompts, missing components, size/position changes, and retracing. Synthetic tests do not establish real-world handwriting accuracy.
