@@ -21,10 +21,13 @@ function setPicture(host,item){
  }else host.textContent=item.emoji;
 }
 
-let pictureGame=null;
+let pictureGame=null,pictureNextTimer=null;
+function cancelPictureNext(){clearTimeout(pictureNextTimer);pictureNextTimer=null;}
+function queuePictureNext(game,delay=1400){cancelPictureNext();pictureNextTimer=setTimeout(()=>{pictureNextTimer=null;if(pictureGame!==game||!game.solved||!finished||game.key!==letterCase+':'+current)return;if(document.hidden||document.querySelector?.('dialog[open]')){queuePictureNext(game,1000);return;}nextAdventureLetter();},delay);}
 const pictureTurns={};
-function resetPictureGame(){pictureGame=null;$('picture-game').hidden=true;$('celebrate').classList.toggle('picture-game-active',false);}
+function resetPictureGame(){cancelPictureNext();pictureGame=null;$('picture-game').hidden=true;$('celebrate').classList.toggle('picture-game-active',false);}
 function startPictureGame(){
+ cancelPictureNext();
  const key=letterCase+':'+current,items=letterExamples();
  const target=(pictureTurns[key]||0)%items.length;pictureTurns[key]=target+1;
  pictureGame={key,letter:current,items,target,solved:false};
@@ -52,9 +55,11 @@ function choosePicture(index){
   game.solved=true;
   buttons[index].classList.toggle('picture-found',true);
   $('picture-game-prompt').textContent=item.word+'! '+game.letter+' is for '+item.word+'.';
-  say(item.word+'! '+spokenLetter(game.letter)+' is for '+item.word+'.');
+  const speech=say(item.word+'! '+spokenLetter(game.letter)+' is for '+item.word+'.',()=>{if(pictureGame===game)queuePictureNext(game);});
+  queuePictureNext(game,speech?6500:1800);
  }else{
   say(item.word+'. Can you find the '+game.items[game.target].word+'?');
   buttons[game.target].classList.toggle('picture-hint',true);
  }
 }
+

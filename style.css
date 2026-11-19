@@ -133,3 +133,5 @@ dialog{touch-action:pan-y}input,textarea{touch-action:manipulation;-webkit-user-
 .pencil-coach{min-height:2.7em;padding:5px 12px;font-size:13px;line-height:1.35;color:#583768;background:#fff8dc;border-radius:10px;flex-shrink:0}
 .pencil-coach[hidden]{display:none}
 .pencil-repair-key{font-size:12px;padding:3px 12px}
+
+.practice-banner{display:flex;align-items:center;justify-content:space-between;padding:4px 12px;background:#e8f4dd;color:#38552c;font-weight:bold;flex-shrink:0;font-size:13px}.practice-banner[hidden]{display:none}.practice-banner button{min-height:32px;font-size:12px}.attempt-card{border-top:1px solid #ded3ea;padding:8px 0}.attempt-card h4{margin:6px 0}.attempt-table{width:100%;border-collapse:collapse;font-size:12px}.attempt-table th,.attempt-table td{text-align:left;padding:6px 3px;border-bottom:1px solid #eee}.attempt-table th{color:#59387b}#target-practice{background:#e8f4dd;border-radius:12px}

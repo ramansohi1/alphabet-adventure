@@ -105,3 +105,15 @@ Pencil instructions now occupy a dedicated strip outside the drawing area. Signi
 ## Recognition agreement fix (v31)
 
 Gentle mode now accepts agreement between a strong geometric match and an unambiguous ranking winner, even when small wobbles narrowly miss the original ranking cutoff. The alternate rule requires ranking of at least .80, a lead of at least .15, coverage and precision of at least .96, every component at least .94, and all existing shape-pass requirements. It is independent of the requested letter; Focused is unchanged. Tests use artificial sine-wave wobbles on the existing public letter template, with no user handwriting coordinates. They cover competing prompts, missing components, size/position changes, and retracing. Synthetic tests do not establish real-world handwriting accuracy.
+
+## Practice and placement (v32)
+
+- Open-ellipse C templates add common rounder forms without requiring the ink to sit on the displayed route. Templates and new test curves are synthetic, not extracted from user recordings.
+- Each changed-ink check saves a bounded summary: shape similarity, recognition result, and percentage inside the letter's writing band (12 guide units of allowance). Above/below-line percentages are independent of recognition. No raw paths or thumbnails are persisted. Each page retains its last eight checks plus its strongest check; at most 150 page attempts remain on this device. New try explicitly saves and clears the page. Repeated unchanged checks are deduplicated.
+- Parent history shows the last six tries, their check scores, strongest check and writing-line placement. Older data remains readable; placement is available only for new checks.
+- The seedling button and parent Practice button pick up to three letters from recent Pencil shape, completion and placement summaries in the current case and difficulty. Each letter proceeds from crayon to pencil automatically; pencil completion keeps the picture game, then moves to the next selected letter. The round ends with a real-paper suggestion. Manual letter/mode changes exit the routine. The routine can be ended at any time.
+- Correct picture choices automatically continue after spoken feedback and a short pause, with a watchdog when browser speech fails. Wrong choices allow another try. Page changes invalidate old callbacks; hidden tabs and open dialogs defer advancement. The arrow remains an optional manual shortcut.
+
+Teaching rationale: the IES practice guide recommends demonstrating letter formation and practice from memory (https://ies.ed.gov/ncee/WWC/PracticeGuide/17/Published). The crayon-to-pencil routine is a product adaptation, not a validated preschool intervention; real-paper practice is still necessary.
+
+Additional checks: `node tests/open-c.test.cjs`, `node tests/recognition-agreement.test.cjs`, and the existing tracing, coaching, Watch and picture-game suites. Integration checks cover off-guide success, placement summaries, check deduplication, fresh tries and the whole practice round.

@@ -97,7 +97,7 @@ function drawPencilParent(rows){
  }
  const list=chartNode('ol','');for(const tip of ['Watch one part together. Say the same short direction as the app.','Let the child draw that part. Use Undo last if they want to redo it; keep the rest.','On real paper, draw a model once. Let the child copy it, cover it, then try one from memory.','Compare together: “What looks the same? Which little part shall we try again?” Finish with one success and a break.'])list.append(chartNode('li','',tip));host.append(list);
  const next=recent.filter(r=>!r.completed).at(-1)||latest;
- if(next){const button=chartNode('button','secondary','Practice '+(next.key.startsWith('lower:')?next.key.split(':')[1].toLowerCase():next.key.split(':')[1])+' together');button.onclick=()=>{endAttempt();letterCase=next.key.split(':')[0];current=next.key.split(':')[1];setGuide('pencil');$('settings-dialog').close();render();describe();};host.append(button);}
+ if(next){const button=chartNode('button','secondary','Practice '+(next.key.startsWith('lower:')?next.key.split(':')[1].toLowerCase():next.key.split(':')[1])+' together');button.onclick=()=>{letterCase=next.key.split(':')[0];startTargetPractice(next.key.split(':')[1]);};host.append(button);}
  host.append(chartNode('p','chart-caption','Only summaries are saved on this device. Exact drawings are not stored. A child may write a valid form the app does not recognize.'));
 }
 function initPencilFeedback(){

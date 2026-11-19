@@ -1,6 +1,12 @@
 // Competing-letter classifier, deliberately independent of the prompted letter.
 // Geometric exemplar recognition, not a learned handwriting model or OCR service.
 const RECOGNITION_TEMPLATES=Object.fromEntries(Object.entries(RECOGNITION_POINTS).map(([kind,letters])=>[kind,Object.fromEntries(Object.entries(letters).map(([letter,strokes])=>[letter,[.7,.85,1,1.15,1.35,1.5].map(width=>strokes.map(s=>s.map(([x,y])=>({x:300+(x-300)*width,y}))))]))]));
+// Additional authored open-ellipse C forms, independent of guide position.
+// Synthetic geometry only: no user handwriting is included in these templates.
+for(const kind of ['upper','lower'])for(const width of [.7,.85,1,1.15,1.35,1.5])for(const opening of [35,45,55]){
+ const cy=kind==='upper'?220:270,rx=(kind==='upper'?120:85)*width,ry=kind==='upper'?140:90;
+ RECOGNITION_TEMPLATES[kind].C.push([Array.from({length:65},(_,i)=>{const a=(-opening-(360-2*opening)*i/64)*Math.PI/180;return {x:300+rx*Math.cos(a),y:cy+ry*Math.sin(a)};})]);
+}
 // Modest natural tilt and alternate A crossbar heights, for every competing letter.
 for(const [kind,letters] of Object.entries(RECOGNITION_TEMPLATES))for(const [letter,variants] of Object.entries(letters)){
  if(kind==='upper'&&letter==='A')for(const template of [...variants])for(const y of [180,210]){

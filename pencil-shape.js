@@ -80,6 +80,7 @@ function assessPencilShape(showHint=false,explicit=true){
   if(epoch!==pencilEpoch||revision!==pencilRevision||letter!==current||kind!==letterCase||guideMode!=='pencil'||finished||drawing)return;
   pencilChecking=false;pencilDecision=decision;pencilMatch=decision.match;
   if(attempt){attempt.shapeMatch=Math.round(pencilMatch.score*100);attempt.shapeCoverage=Math.round(pencilMatch.coverage*100);attempt.shapePrecision=Math.round(pencilMatch.precision*100);attempt.version=4;attempt.recognition=decision.state;attempt.recognized=decision.recognized;}
+  if(typeof notePencilCheck==='function')notePencilCheck(decision,ink,revision);
   updatePencilFeedback();
   if(decision.state==='correct'){cancelPencilPause();clearPencilCue();stroke=paths.length;completeLetter();}
   else if(showHint&&explicit)showPencilCue();else {clearPencilCue();showPencilMessage('Take your time. Tap Check when done.');}
@@ -87,7 +88,7 @@ function assessPencilShape(showHint=false,explicit=true){
 }
 
 function updatePencilFeedback(){
- $('pencil-coach').hidden=guideMode!=='pencil';
+ $('pencil-coach').hidden=guideMode!=='pencil';$('retry').setAttribute('aria-label',guideMode==='pencil'?'New try: save this attempt and clear the paper':'Clear the paper and try again');const retryText=$('retry').querySelector?.('span:last-child');if(retryText)retryText.textContent=guideMode==='pencil'?'New try':'New page';
  if(typeof clearPencilRepair==='function'){for(const id of ['undo-pencil','hide-pencil-guide'])$(id).hidden=guideMode!=='pencil';$('undo-pencil').disabled=finished||drawing||!pencilStrokes.length;}
  $('check-pencil').hidden=guideMode!=='pencil';$('help').setAttribute('aria-label',guideMode==='pencil'?'Help: hear this drawing step':'Help: show the part to try');
  drawPencilDirections();
